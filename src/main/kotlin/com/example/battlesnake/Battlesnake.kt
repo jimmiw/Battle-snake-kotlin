@@ -20,7 +20,10 @@ const val author = "YourNameHere" // put your name here!
 // This is the json serializer used
 // It ignores unknown keys by default, but invalid values will not be accepted
 // Be careful with errors!
-val json = Json { ignoreUnknownKeys = true }
+val json = Json {
+    ignoreUnknownKeys = true
+    encodeDefaults = true
+}
 
 // This is the main entry point of your snake.
 fun main() {
