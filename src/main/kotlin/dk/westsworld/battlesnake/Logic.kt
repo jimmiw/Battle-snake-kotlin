@@ -13,12 +13,17 @@ fun decideMove(request: MoveRequest): Direction {
 
         // Step 0: Don't let your Battlesnake move back on its own neck
         val neck = request.you.body[1]
-        newPosition != neck
+//        newPosition != neck
 
         // TODO: Step 1 - Don't hit walls.
         // Use information in the request to prevent your Battlesnake from moving beyond the boundaries of the board.
-        // val boardWidth = request.board.width
-        // val boardHeight = request.board.height
+        val boardWidth = request.board.width
+        val boardHeight = request.board.height
+
+        newPosition.x < boardWidth && newPosition.x <= 0
+        newPosition.y < boardHeight && newPosition.y <= 0
+
+        newPosition != neck
 
         // TODO: Step 2 - Don't hit yourself.
         // Use information in the request to prevent your Battlesnake from colliding with itself.
