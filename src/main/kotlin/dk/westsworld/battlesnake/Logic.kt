@@ -1,4 +1,4 @@
-package com.example.battlesnake
+package dk.westsworld.battlesnake
 
 // This is the heart of your snake
 // It defines what to do on your next move

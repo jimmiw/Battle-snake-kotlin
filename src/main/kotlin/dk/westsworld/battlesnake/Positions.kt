@@ -1,4 +1,4 @@
-package com.example.battlesnake
+package dk.westsworld.battlesnake
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

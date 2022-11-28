@@ -7,11 +7,11 @@ plugins {
     application
 }
 
-group = "com.example" // Put your name here!
-version = "1.0"
+group = "dk.westsworld" // Put your name here!
+version = "0.1"
 
 // Declares the main class. Change this value if you rename Battlesnake.kt!
-val mainName = "com.example.battlesnake.BattlesnakeKt"
+val mainName = "dk.westsworld.battlesnake.BattlesnakeKt"
 
 // Declares usage of the Maven Central repository
 // Do not remove!
