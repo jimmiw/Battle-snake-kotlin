@@ -1,20 +1,23 @@
-# This builder image will not be used at runtime
-# See https://docs.docker.com/develop/develop-images/multistage-build/
-FROM gradle:7.5.1 as builder
+FROM gradle:7.5.1-jdk17 as builder
+
+RUN gradle --version && java --version
+
+WORKDIR /app
+
+# Only copy dependency-related files
+COPY build.gradle.kts settings.gradle.kts /app/
+# Only download dependencies
+# Eat the expected build failure since no source code has been copied yet
+RUN gradle clean build --no-daemon > /dev/null 2>&1 || true
 
 # Copy sourcecode into build image
 COPY . /app
 
-WORKDIR /app
-
 RUN gradle clean build --no-daemon
 
-# Now switch to the runtime image; base it on the latest Java, in a "slim" variant.
-FROM openjdk:17-slim
-EXPOSE 3000 8080
+EXPOSE 3000
 
-COPY --from=builder ./app/build/libs/mister-sneaky-pants-0.1.jar app.jar
 # copy customizations file, so the app.jar can use it
 COPY customizations.json .
 # Run it
-CMD [ "java", "-jar",  "./app.jar" ]
+CMD java -jar build/libs/*.jar
