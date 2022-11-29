@@ -20,8 +20,8 @@ fun decideMove(request: MoveRequest): Direction {
         val boardWidth = request.board.width
         val boardHeight = request.board.height
 
-        newPosition.x < boardWidth && newPosition.x <= 0
-        newPosition.y < boardHeight && newPosition.y <= 0
+        newPosition.x < boardWidth && newPosition.x >= 0
+        newPosition.y < boardHeight && newPosition.y >= 0
 
         newPosition != neck
 
