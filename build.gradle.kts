@@ -30,6 +30,9 @@ dependencies {
     // Logging library used by Ktor
     // Remove this if you don't want logging
     implementation("ch.qos.logback:logback-classic:1.2.11")
+
+    // Other dependencies.
+    testImplementation(kotlin("test"))
 }
 
 // Utility functions for declaring dependencies
@@ -52,6 +55,10 @@ tasks {
 
         manifest { attributes("Main-Class" to mainName) }
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 // Allows you to run using gradlew
