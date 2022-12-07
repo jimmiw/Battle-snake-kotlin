@@ -20,14 +20,14 @@ fun decideMove(request: MoveRequest): Direction {
         // Find the next intended position
         val newPosition = head + direction
 
-        isHazard(newPosition, request.board)
+        ! isHazard(newPosition, request.board)
     }
 
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
         val newPosition = head + direction
 
-        isCollidingWithSnake(newPosition, request.you)
+        ! isCollidingWithSnake(newPosition, request.you)
     }
 
     // Step 0: Don't let your Battlesnake move back on its own neck
@@ -92,8 +92,6 @@ fun isHazard(position: Position, board: Board): Boolean {
  */
 fun isCollidingWithSnake(position: Position, battleSnake: BattleSnake): Boolean {
     // Step 0: Don't let your Battlesnake move back on its own neck
-//    val neck = battleSnake.body[1]
-
     for (bodyPosition in battleSnake.body) {
         // if the given position is on a part of the given battleSnakes body, we are hitting the body
         if (bodyPosition == position) {
