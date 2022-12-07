@@ -30,6 +30,24 @@ fun decideMove(request: MoveRequest): Direction {
         ! isCollidingWithSnake(newPosition, request.you)
     }
 
+    // avoid other snakes at all costs!
+    for (snake in request.board.snakes) {
+        safeMoves = safeMoves.filter { direction ->
+            // Find the next intended position
+            val newPosition = head + direction
+            // checking if the new position is on an opposing snake in the game
+            !isCollidingWithSnake(newPosition, snake)
+        }
+    }
+
+    // find fruits! so we can live long and be long!!!!
+    val foodMoves = safeMoves.filter { direction ->
+        // Find the next intended position
+        val newPosition = head + direction
+
+        isFoodMove(newPosition, request.board)
+    }
+
     // Step 0: Don't let your Battlesnake move back on its own neck
 
     // TODO: Step 1 - Don't hit walls.
@@ -49,7 +67,23 @@ fun decideMove(request: MoveRequest): Direction {
 
     // Note: we use randomOrNull, so we don't get an exception when we are out of options
     // Rather, we move down, which will most likely kill us, but at least we do something
-    return safeMoves.randomOrNull() ?: Direction.DOWN
+    return foodMoves.randomOrNull() ?: safeMoves.randomOrNull() ?: Direction.DOWN
+}
+
+/**
+ * CAN the next move be a move with FOOD?
+ * @param position the new position to check
+ * @param board the current game board
+ * @return Boolean true if the given position contains food
+ */
+fun isFoodMove(position: Position, board: Board): Boolean {
+    for (food in board.food) {
+        if (food == position) {
+            return true
+        }
+    }
+
+    return false
 }
 
 /**
