@@ -37,13 +37,34 @@ fun decideMove(request: MoveRequest): Direction {
 //    return bestMove
 
 
+    val safeMoves = getSafeMoves(request.board, request.you)
+
+    // find fruits! so we can live long and be long!!!!
+    val nextMoveIsFood = safeMoves.filter { direction ->
+        // Find the next intended position
+        val newPosition = head + direction
+
+        isFoodMove(newPosition, request.board)
+    }
+
+    // we are trying to hunt for food... or go down :)
+    return goTowardsFood(request.you, request.board) ?: safeMoves.randomOrNull() ?: Direction.DOWN
+
+    // Note: we use randomOrNull, so we don't get an exception when we are out of options
+    // Rather, we move down, which will most likely kill us, but at least we do something
+    //return nextMoveIsFood.randomOrNull() ?: goTowardsFood() ?: safeMoves.randomOrNull() ?: Direction.DOWN
+}
+
+fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction> {
+    val head = currentSnake.head
+
     // Finds moves to do, that are still on the map :)
     var safeMoves = enumValues<Direction>().filter { direction ->
         // Find the next intended position
         val newPosition = head + direction
 
         // testing if the new position is out of bounds, of the current board
-        ! isOutOfBounds(newPosition, request.board)
+        ! isOutOfBounds(newPosition, board)
     }
 
     // finds the next move, that is NOT a hazard (wall etc.)
@@ -51,37 +72,59 @@ fun decideMove(request: MoveRequest): Direction {
         // Find the next intended position
         val newPosition = head + direction
 
-        ! isHazard(newPosition, request.board)
+        ! isHazard(newPosition, board)
     }
 
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
         val newPosition = head + direction
 
-        ! isCollidingWithSnake(newPosition, request.you)
+        ! isCollidingWithSnake(newPosition, currentSnake, board)
     }
 
     // avoid other snakes at all costs!
-    for (snake in request.board.snakes) {
+    for (snake in board.snakes) {
         safeMoves = safeMoves.filter { direction ->
             // Find the next intended position
             val newPosition = head + direction
             // checking if the new position is on an opposing snake in the game
-            !isCollidingWithSnake(newPosition, snake)
+            !isCollidingWithSnake(newPosition, snake, board)
         }
     }
 
-    // find fruits! so we can live long and be long!!!!
-    val foodMoves = safeMoves.filter { direction ->
-        // Find the next intended position
-        val newPosition = head + direction
+    return safeMoves
+}
 
-        isFoodMove(newPosition, request.board)
+fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
+    var closetFoodPosition: Position? = null;
+
+    for (foodPosition in board.food) {
+        // no best
+        if (closetFoodPosition == null) {
+            closetFoodPosition = foodPosition
+        }
     }
 
-    // Note: we use randomOrNull, so we don't get an exception when we are out of options
-    // Rather, we move down, which will most likely kill us, but at least we do something
-    return foodMoves.randomOrNull() ?: safeMoves.randomOrNull() ?: Direction.DOWN
+    // no close foods? just return null
+    if (closetFoodPosition == null) {
+        return null
+    }
+
+    // fetches the list of safe moves, for our snake
+    val safeMoves = getSafeMoves(board, battleSnake)
+    val head = battleSnake.head;
+
+    // finds the next move, based on the closet food position.
+    // we can only advance in a direction, if the move is safe to use
+    if (head.x < closetFoodPosition.x && safeMoves.contains(Direction.RIGHT)) {
+        return Direction.RIGHT
+    } else if (head.x > closetFoodPosition.x && safeMoves.contains(Direction.LEFT)) {
+        return Direction.LEFT
+    } else if (head.y < closetFoodPosition.y && safeMoves.contains(Direction.UP)) {
+        return Direction.UP
+    } else {
+        return Direction.DOWN
+    }
 }
 
 fun minimax(move: Direction, board: Board): Int {
@@ -102,6 +145,19 @@ fun isFoodMove(position: Position, board: Board): Boolean {
 
     for (food in board.food) {
         if (food == position) {
+            return true
+        }
+    }
+
+    return false
+}
+
+/**
+ * Checks if the given battle snake can make a food move
+ */
+fun hasImmediateFoodMove(battleSnake: BattleSnake, board: Board): Boolean {
+    for (move in enumValues<Direction>()) {
+        if (isFoodMove(battleSnake.head + move.position, board)) {
             return true
         }
     }
@@ -147,9 +203,15 @@ fun isHazard(position: Position, board: Board): Boolean {
  * @param battleSnake the snake to test on
  * @return Boolean
  */
-fun isCollidingWithSnake(position: Position, battleSnake: BattleSnake): Boolean {
+fun isCollidingWithSnake(position: Position, battleSnake: BattleSnake, board: Board): Boolean {
+    var snakeBody = battleSnake.body
+    // only remove the tail, if the body is more than one element
+    if (battleSnake.length > 1 && ! hasImmediateFoodMove(battleSnake, board)) {
+        snakeBody = snakeBody.subList(0, battleSnake.length - 1 )
+    }
+
     // Step 0: Don't let your Battlesnake move back on its own neck
-    for (bodyPosition in battleSnake.body) {
+    for (bodyPosition in snakeBody) {
         // if the given position is on a part of the given battleSnakes body, we are hitting the body
         if (bodyPosition == position) {
             return true

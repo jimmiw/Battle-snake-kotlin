@@ -95,9 +95,10 @@ internal class LogicKtTest {
             SnakeCustomization("", "", "")
         )
 
-        assertFalse(isCollidingWithSnake(Position(0, 0), battleSnake))
-        assertFalse(isCollidingWithSnake(Position(2, 5), battleSnake))
-        assertTrue(isCollidingWithSnake(Position(5, 5), battleSnake))
-        assertTrue(isCollidingWithSnake(Position(5, 6), battleSnake))
+        assertFalse(isCollidingWithSnake(Position(0, 0), battleSnake, board))
+        assertFalse(isCollidingWithSnake(Position(2, 5), battleSnake, board))
+        assertTrue(isCollidingWithSnake(Position(5, 5), battleSnake, board))
+        // this should be false, since the snake is moving - so the tail is shifting position
+        assertFalse(isCollidingWithSnake(Position(5, 6), battleSnake, board))
     }
 }
