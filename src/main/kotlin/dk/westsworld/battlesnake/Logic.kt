@@ -147,9 +147,10 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
                 }
             }
 
-            println("Check for head-to-head collision @ " + newPosition)
+            println("Check for head-to-head collision against " + snake.name + " @ " + newPosition)
             println("Lengths: other vs mine: " + snake.length + "," + currentSnake.length)
             println("Is snake adjacent? " + snake.head.adjacent().contains(newPosition))
+            println("Direction " + direction)
             println("Is move valid? " + valid)
 
             valid
