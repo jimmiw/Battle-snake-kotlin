@@ -138,13 +138,13 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board): List<Direction>? {
 //    println(safeMoves)
 
     // are we colliding with ourselves?
-    safeMoves = safeMoves.filter { direction ->
-        // Find the next intended position
-        val newPosition = head + direction
-
-//        println("Check colliding move @ " + direction)
-        ! isCollidingWithSnake(newPosition, currentSnake, board)
-    }
+//    safeMoves = safeMoves.filter { direction ->
+//        // Find the next intended position
+//        val newPosition = head + direction
+//
+////        println("Check colliding move @ " + direction)
+//        ! isCollidingWithSnake(newPosition, currentSnake, board)
+//    }
 
 //    println("Colliding OK moves");
 //    println(safeMoves)
@@ -154,12 +154,12 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board): List<Direction>? {
         return null
     }
 
-    // avoid other snakes at all costs!
+    // avoid all snakes at all costs!
     for (snake in board.snakes) {
         // skip our own snake :)
-        if (snake.id == currentSnake.id) {
-            continue
-        }
+//        if (snake.id == currentSnake.id) {
+//            continue
+//        }
 
 //        println("check other snakes: " + snake.name)
         safeMoves = safeMoves.filter { direction ->
