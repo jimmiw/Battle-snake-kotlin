@@ -5,6 +5,7 @@ package dk.westsworld.battlesnake
 // You get the current game state passed as a parameter, you only have to return a direction to move into
 fun decideMove(request: MoveRequest): Direction {
     val head = request.you.head
+    println(request)
 
 //    // Finds moves to do, that are still on the map :)
 //    var movesAvailable = enumValues<Direction>().filter { direction ->
@@ -48,7 +49,11 @@ fun decideMove(request: MoveRequest): Direction {
     }
 
     // we are trying to hunt for food... or go down :)
-    return goTowardsFood(request.you, request.board) ?: safeMoves.randomOrNull() ?: Direction.DOWN
+    val direction = goTowardsFood(request.you, request.board) ?: safeMoves.randomOrNull() ?: Direction.DOWN
+
+    println("MOVE: " + direction + " @ " + (head + direction))
+
+    return direction
 
     // Note: we use randomOrNull, so we don't get an exception when we are out of options
     // Rather, we move down, which will most likely kill us, but at least we do something

@@ -40,7 +40,7 @@ data class Game(
     val ruleset: Ruleset,
     val map: String? = null,
     val timeout: Long,
-    val source: GameSource
+    val source: GameSource? = null
 )
 
 @Serializable
