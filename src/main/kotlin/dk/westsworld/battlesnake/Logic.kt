@@ -62,9 +62,17 @@ fun decideMove(request: MoveRequest): Direction {
 
 fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction> {
     val head = currentSnake.head
+    val neck = currentSnake.body[1];
+
+    // do not hit our own neck!
+    var safeMoves = enumValues<Direction>().filter { direction ->
+        val newPosition = head + direction
+
+        newPosition != neck
+    }
 
     // Finds moves to do, that are still on the map :)
-    var safeMoves = enumValues<Direction>().filter { direction ->
+    safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
         val newPosition = head + direction
 
@@ -87,21 +95,24 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction> {
         ! isCollidingWithSnake(newPosition, currentSnake, board)
     }
 
-    // do not hit our own neck!
-    val neck = currentSnake.body[1];
-    safeMoves = safeMoves.filter { direction ->
-        val newPosition = head + direction
-
-        newPosition != neck
-    }
-
     // avoid other snakes at all costs!
     for (snake in board.snakes) {
         safeMoves = safeMoves.filter { direction ->
             // Find the next intended position
             val newPosition = head + direction
+
+            // TODO: look ahead for the given snake, to check if the position we are choosing, could be chosen by that snake
+
             // checking if the new position is on an opposing snake in the game
             !isCollidingWithSnake(newPosition, snake, board)
+        }
+
+        safeMoves = safeMoves.filter { direction ->
+            // Find the next intended position
+            val newPosition = head + direction
+
+            // if our snake is smaller than a snake close to us, do not go TOO close to it's head!
+            ! (snake.length > currentSnake.length && snake.head.adjacent().contains(newPosition))
         }
     }
 
@@ -229,6 +240,11 @@ fun isCollidingWithSnake(position: Position, battleSnake: BattleSnake, board: Bo
         if (bodyPosition == position) {
             return true
         }
+    }
+
+    // checking if we MIGHT collide with a given snake...
+    if (battleSnake.head.adjacent().contains(position)) {
+        return true
     }
 
     return false

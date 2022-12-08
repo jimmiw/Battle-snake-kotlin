@@ -101,4 +101,9 @@ internal class LogicKtTest {
         // this should be false, since the snake is moving - so the tail is shifting position
         assertFalse(isCollidingWithSnake(Position(5, 6), battleSnake, board))
     }
+
+//    fun testPositionMath() {
+//        var position = Position(1,1);
+//        assertEquals(Position(0, 1), position - Direction.LEFT)
+//    }
 }
