@@ -115,6 +115,11 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
 
     // avoid other snakes at all costs!
     for (snake in board.snakes) {
+        // skip our own snake :)
+        if (snake.id == currentSnake.id) {
+            continue
+        }
+
 //        println("check other snakes: " + snake.name)
         safeMoves = safeMoves.filter { direction ->
             // Find the next intended position
