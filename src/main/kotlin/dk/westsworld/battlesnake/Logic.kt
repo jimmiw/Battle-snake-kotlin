@@ -146,8 +146,12 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board): List<Direction>? {
             // checking if the new position is on an opposing snake in the game
             var validMove = !isCollidingWithSnake(newPosition, snake, board)
 
-            // checking if the given snake is within 1 distance of the new position
-            if (getDistance(snake.head, newPosition) <= 1.0) {
+            // checking if the given snake is within too close of a distance of the new position
+            val distance = getDistance(snake.head, newPosition)
+            if (distance <= 1.5) {
+                println("Move " + direction + " is not valid, as it is too close to an other snake")
+                println("points: " + snake.head + " & " + newPosition)
+                println("distance: " + distance)
                 validMove = false
             }
 
