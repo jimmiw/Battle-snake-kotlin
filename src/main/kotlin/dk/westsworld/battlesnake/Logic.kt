@@ -52,7 +52,7 @@ fun decideMove(request: MoveRequest): Direction {
     //return nextMoveIsFood.randomOrNull() ?: goTowardsFood() ?: safeMoves.randomOrNull() ?: Direction.DOWN
 }
 
-fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction> {
+fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
     val head = currentSnake.head
     val neck = currentSnake.body[1];
 
@@ -80,11 +80,17 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction> {
         ! isHazard(newPosition, board)
     }
 
+    // are we colliding with ourselves?
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
         val newPosition = head + direction
 
         ! isCollidingWithSnake(newPosition, currentSnake, board)
+    }
+
+    if (safeMoves.isEmpty()) {
+        println("no safe moves left, before looking at other snakes!")
+        return null
     }
 
     // avoid other snakes at all costs!
