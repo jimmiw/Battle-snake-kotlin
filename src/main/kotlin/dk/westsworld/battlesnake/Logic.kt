@@ -87,6 +87,14 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction> {
         ! isCollidingWithSnake(newPosition, currentSnake, board)
     }
 
+    // do not hit our own neck!
+    val neck = currentSnake.body[1];
+    safeMoves = safeMoves.filter { direction ->
+        val newPosition = head + direction
+
+        newPosition != neck
+    }
+
     // avoid other snakes at all costs!
     for (snake in board.snakes) {
         safeMoves = safeMoves.filter { direction ->
