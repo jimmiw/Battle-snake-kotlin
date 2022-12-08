@@ -6,8 +6,38 @@ package dk.westsworld.battlesnake
 fun decideMove(request: MoveRequest): Direction {
     val head = request.you.head
 
-    // Find all "safe" moves to do
-    // (if you do a move that is not in this list, you will lose)
+//    // Finds moves to do, that are still on the map :)
+//    var movesAvailable = enumValues<Direction>().filter { direction ->
+//        // Find the next intended position
+//        val newPosition = head + direction
+//
+//        // testing if the new position is out of bounds, of the current board
+//        ! isOutOfBounds(newPosition, request.board)
+//    }
+//
+//    // finds the next move, that is NOT a hazard (wall etc.)
+//    movesAvailable = movesAvailable.filter { direction ->
+//        // Find the next intended position
+//        val newPosition = head + direction
+//
+//        ! isHazard(newPosition, request.board)
+//    }
+//
+//    var bestScore = -10000;
+//    var bestMove = Direction.DOWN;
+//
+//    for (move in movesAvailable) {
+//        val score = minimax(move, request.board)
+//        if (score > bestScore) {
+//            bestScore = score
+//            bestMove = move
+//        }
+//    }
+//
+//    return bestMove
+
+
+    // Finds moves to do, that are still on the map :)
     var safeMoves = enumValues<Direction>().filter { direction ->
         // Find the next intended position
         val newPosition = head + direction
@@ -16,6 +46,7 @@ fun decideMove(request: MoveRequest): Direction {
         ! isOutOfBounds(newPosition, request.board)
     }
 
+    // finds the next move, that is NOT a hazard (wall etc.)
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
         val newPosition = head + direction
@@ -48,26 +79,13 @@ fun decideMove(request: MoveRequest): Direction {
         isFoodMove(newPosition, request.board)
     }
 
-    // Step 0: Don't let your Battlesnake move back on its own neck
-
-    // TODO: Step 1 - Don't hit walls.
-    // Use information in the request to prevent your Battlesnake from moving beyond the boundaries of the board.
-
-    // TODO: Step 2 - Don't hit yourself.
-    // Use information in the request to prevent your Battlesnake from colliding with itself.
-    // val myBody = request.you.body
-
-    // TODO: Step 3 - Don't collide with others.
-    // Use information in the request to prevent your Battlesnake from colliding with others.
-
-    // TODO: Step 4 - Find food.
-    // Use information in the request to seek out and find food.
-    // Finally, choose a move from the available safe moves.
-    // TODO: Step 5 - Select a move to make based on strategy, rather than random.
-
     // Note: we use randomOrNull, so we don't get an exception when we are out of options
     // Rather, we move down, which will most likely kill us, but at least we do something
     return foodMoves.randomOrNull() ?: safeMoves.randomOrNull() ?: Direction.DOWN
+}
+
+fun minimax(move: Direction, board: Board): Int {
+    return 0
 }
 
 /**
@@ -77,6 +95,11 @@ fun decideMove(request: MoveRequest): Direction {
  * @return Boolean true if the given position contains food
  */
 fun isFoodMove(position: Position, board: Board): Boolean {
+    // handle no food on the board
+    if (board.food.isEmpty()) {
+        return false
+    }
+
     for (food in board.food) {
         if (food == position) {
             return true
