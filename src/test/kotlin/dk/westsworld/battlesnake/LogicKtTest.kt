@@ -11,9 +11,57 @@ internal class LogicKtTest {
         assert(true)
     }
 
-    @Test
-    fun testDecideMove() {
-        val board = Board(11, 11, listOf(), listOf(), listOf())
+    private fun getMoveRequest(): MoveRequest {
+        var snake = BattleSnake(
+            "snake id 1",
+            "snake1",
+            100,
+            listOf(Position(5, 5), Position(5, 6)),
+            "111",
+            Position(5, 6),
+            2,
+            "",
+            "snake squard",
+            SnakeCustomization("","","")
+        )
+        var snakeTwo = BattleSnake(
+            "snake id 2",
+            "snake2",
+            100,
+            listOf(Position(9, 9), Position(9, 7)),
+            "111",
+            Position(9, 9),
+            2,
+            "",
+            "snake squard 2",
+            SnakeCustomization("","","")
+        )
+        var snakeThree = BattleSnake(
+            "snake id 3",
+            "snake3",
+            100,
+            listOf(Position(3, 6), Position(3, 7)),
+            "111",
+            Position(3, 6),
+            2,
+            "",
+            "snake squard 3",
+            SnakeCustomization("","","")
+        )
+        var snakeFour = BattleSnake(
+            "snake id 4",
+            "snake4",
+            100,
+            listOf(Position(4, 1), Position(4, 0)),
+            "111",
+            Position(4, 1),
+            2,
+            "",
+            "snake squard 4",
+            SnakeCustomization("","","")
+        )
+
+        val board = Board(11, 11, listOf(), listOf(), listOf(snakeTwo,snakeThree,snakeFour))
         var game = Game(
             "game id 1",
             Ruleset(
@@ -32,30 +80,23 @@ internal class LogicKtTest {
             GameSource.LEAGUE
         );
 
-        var snake = BattleSnake(
-            "snake id 1",
-            "snake name",
-            100,
-            listOf(Position(5, 5), Position(5, 6)),
-            "111",
-            Position(5, 6),
-            2,
-            "",
-            "snake squard",
-            SnakeCustomization("","","")
-        )
-
-        var request = MoveRequest(
+        return MoveRequest(
             game,
             2,
             board,
             snake
         )
+    }
+
+    @Test
+    fun testDecideMove() {
+
+        val request = getMoveRequest()
 
         println(decideMove(request));
         println(decideMove(request));
-        println(decideMove(request));
-        println(decideMove(request));
+//        println(decideMove(request));
+//        println(decideMove(request));
     }
 
     @Test
@@ -106,4 +147,12 @@ internal class LogicKtTest {
 //        var position = Position(1,1);
 //        assertEquals(Position(0, 1), position - Direction.LEFT)
 //    }
+
+    @Test
+    fun testGetSafeMoves() {
+        val request = getMoveRequest()
+
+        var safeMoves = getSafeMoves(request.board, request.you)
+        println("Test done, found safeMoves: " + safeMoves)
+    }
 }

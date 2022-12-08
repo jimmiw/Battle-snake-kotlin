@@ -38,17 +38,17 @@ fun decideMove(request: MoveRequest): Direction {
 //    return bestMove
 
 
-    val safeMoves = getSafeMoves(request.board, request.you)
+//    val safeMoves = getSafeMoves(request.board, request.you)
 
     // we are trying to hunt for food... or go down :)
-    var direction = goTowardsFood(request.you, request.board)
-    if (direction == null) {
-        if (safeMoves.isNullOrEmpty()) {
-            direction = Direction.DOWN
-        } else {
-            direction = safeMoves.random()
-        }
-    }
+    var direction = goTowardsFood(request.you, request.board) ?: Direction.LEFT
+//    if (direction == null) {
+//        if (safeMoves.isNullOrEmpty()) {
+//            direction = Direction.DOWN
+//        } else {
+//            direction = safeMoves.random()
+//        }
+//    }
 
     println("MOVE: " + direction + " @ " + (head + direction))
 
@@ -70,6 +70,9 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
         newPosition != neck
     }
 
+    println("Neck OK moves");
+    println(safeMoves)
+
     // Finds moves to do, that are still on the map :)
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
@@ -79,6 +82,9 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
         ! isOutOfBounds(newPosition, board)
     }
 
+    println("Bounds OK moves");
+    println(safeMoves)
+
     // finds the next move, that is NOT a hazard (wall etc.)
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
@@ -87,13 +93,20 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
         ! isHazard(newPosition, board)
     }
 
+    println("Hazard OK moves");
+    println(safeMoves)
+
     // are we colliding with ourselves?
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
         val newPosition = head + direction
 
+        println("Check colliding move @ " + direction)
         ! isCollidingWithSnake(newPosition, currentSnake, board)
     }
+
+    println("Colliding OK moves");
+    println(safeMoves)
 
     if (safeMoves.isEmpty()) {
         println("no safe moves left, before looking at other snakes!")
@@ -102,6 +115,7 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
 
     // avoid other snakes at all costs!
     for (snake in board.snakes) {
+        println("check other snakes: " + snake.name)
         safeMoves = safeMoves.filter { direction ->
             // Find the next intended position
             val newPosition = head + direction
@@ -137,22 +151,25 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
 }
 
 fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
-    var closetFoodPosition: Position? = null;
+    var position: Position? = null;
 
     for (foodPosition in board.food) {
         // no best
-        if (closetFoodPosition == null) {
-            closetFoodPosition = foodPosition
+        if (position == null) {
+            position = foodPosition
         }
     }
 
-    // no close foods? just return null
-    if (closetFoodPosition == null) {
-        return null
-    }
+//    // no close foods? just return null
+//    if (closetFoodPosition == null) {
+//        return null
+//    }
 
     // fetches the list of safe moves, for our snake
     val safeMoves = getSafeMoves(board, battleSnake)
+
+    println("Found safeMoves:")
+    println(safeMoves)
 
     if (safeMoves.isNullOrEmpty()) {
         println("No safe moves found in goTowardsFood().. returning UP")
@@ -163,11 +180,11 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
 
     // finds the next move, based on the closet food position.
     // we can only advance in a direction, if the move is safe to use
-    if (head.x < closetFoodPosition.x && safeMoves.contains(Direction.RIGHT)) {
+    if (position != null && head.x < position.x && safeMoves.contains(Direction.RIGHT)) {
         return Direction.RIGHT
-    } else if (head.x > closetFoodPosition.x && safeMoves.contains(Direction.LEFT)) {
+    } else if (position != null && head.x > position.x && safeMoves.contains(Direction.LEFT)) {
         return Direction.LEFT
-    } else if (head.y < closetFoodPosition.y && safeMoves.contains(Direction.UP)) {
+    } else if (position != null && head.y < position.y && safeMoves.contains(Direction.UP)) {
         return Direction.UP
     } else {
         return Direction.DOWN
@@ -247,28 +264,28 @@ fun isHazard(position: Position, board: Board): Boolean {
 /**
  * Tests if the given position is hitting anywhere on the given snake body
  * @param position the position to check for collision
- * @param battleSnake the snake to test on
+ * @param snake the snake to test on
  * @return Boolean
  */
-fun isCollidingWithSnake(position: Position, battleSnake: BattleSnake, board: Board): Boolean {
-    var snakeBody = battleSnake.body
+fun isCollidingWithSnake(position: Position, snake: BattleSnake, board: Board): Boolean {
+    var snakeBody = snake.body
+    println("Check colliding with " + snake.name)
     // only remove the tail, if the body is more than one element
-    if (battleSnake.length > 1 && ! hasImmediateFoodMove(battleSnake, board)) {
-        snakeBody = snakeBody.subList(0, battleSnake.length - 1 )
+    if (snake.length > 1 && ! hasImmediateFoodMove(snake, board)) {
+        snakeBody = snakeBody.subList(0, snake.length - 1 )
+        println("subtracting snake tail!")
     }
 
     // Step 0: Don't let your Battlesnake move back on its own neck
     for (bodyPosition in snakeBody) {
         // if the given position is on a part of the given battleSnakes body, we are hitting the body
         if (bodyPosition == position) {
+            println("New position is hitting body at " + position + " with body pos: " + bodyPosition)
             return true
         }
     }
 
-    // checking if we MIGHT collide with a given snake...
-    if (battleSnake.head.adjacent().contains(position)) {
-        return true
-    }
+    println("no colliding parts found!")
 
     return false
 }
