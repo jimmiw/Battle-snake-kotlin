@@ -41,7 +41,14 @@ fun decideMove(request: MoveRequest): Direction {
     val safeMoves = getSafeMoves(request.board, request.you)
 
     // we are trying to hunt for food... or go down :)
-    val direction = goTowardsFood(request.you, request.board) ?: safeMoves.randomOrNull() ?: Direction.DOWN
+    var direction = goTowardsFood(request.you, request.board)
+    if (direction == null) {
+        if (safeMoves.isNullOrEmpty()) {
+            direction = Direction.DOWN
+        } else {
+            direction = safeMoves.random()
+        }
+    }
 
     println("MOVE: " + direction + " @ " + (head + direction))
 
@@ -146,6 +153,12 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
 
     // fetches the list of safe moves, for our snake
     val safeMoves = getSafeMoves(board, battleSnake)
+
+    if (safeMoves.isNullOrEmpty()) {
+        println("No safe moves found in goTowardsFood().. returning UP")
+        return Direction.UP
+    }
+
     val head = battleSnake.head;
 
     // finds the next move, based on the closet food position.
