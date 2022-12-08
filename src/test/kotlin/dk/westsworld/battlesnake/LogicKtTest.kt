@@ -161,5 +161,7 @@ internal class LogicKtTest {
     fun testGetDistance() {
         // testing get distance between two points, but rounding the result to int, to make it easier to test :)
         assertEquals(3, getDistance(Position(1,1), Position(3,3)).roundToInt())
+
+        assertEquals(3.0, getDistance(Position(1,1), Position(1,2)))
     }
 }

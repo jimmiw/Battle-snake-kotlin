@@ -115,9 +115,6 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board): List<Direction>? {
         newPosition != neck
     }
 
-//    println("Neck OK moves");
-//    println(safeMoves)
-
     // Finds moves to do, that are still on the map :)
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
@@ -127,9 +124,6 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board): List<Direction>? {
         ! isOutOfBounds(newPosition, board)
     }
 
-//    println("Bounds OK moves");
-//    println(safeMoves)
-
     // finds the next move, that is NOT a hazard (wall etc.)
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
@@ -138,9 +132,6 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board): List<Direction>? {
         ! isHazard(newPosition, board)
     }
 
-//    println("Hazard OK moves");
-//    println(safeMoves)
-
     if (safeMoves.isEmpty()) {
         println("no safe moves left, before looking at other snakes!")
         return null
@@ -148,21 +139,17 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board): List<Direction>? {
 
     // avoid all snakes at all costs!
     for (snake in board.snakes) {
-        // skip our own snake :)
-//        if (snake.id == currentSnake.id) {
-//            continue
-//        }
-
-//        println("check other snakes: " + snake.name)
         safeMoves = safeMoves.filter { direction ->
             // Find the next intended position
             val newPosition = head + direction
 
             // checking if the new position is on an opposing snake in the game
-            val validMove = !isCollidingWithSnake(newPosition, snake, board)
+            var validMove = !isCollidingWithSnake(newPosition, snake, board)
 
-//            println("check for collision1 " + newPosition)
-//            println("Is move valid? " + validMove)
+            // checking if the given snake is within 1 distance of the new position
+            if (getDistance(snake.head, newPosition) <= 1.0) {
+                validMove = false
+            }
 
             validMove
         }
