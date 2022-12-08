@@ -41,11 +41,11 @@ fun decideMove(request: MoveRequest): Direction {
 
     // we are trying to hunt for food... or go down :)
     val foodDirection: Direction? = goTowardsFood(request.you, request.board)
-    val killingDirection: Direction? = findPossibleHeadToHeadKillDirection(request.you, request.board)
+//    val killingDirection: Direction? = findPossibleHeadToHeadKillDirection(request.you, request.board)
     val safeMoves = getSafeMoves(request.you, request.board)
 
 
-    val direction = killingDirection ?: foodDirection ?: safeMoves?.randomOrNull() ?: Direction.DOWN
+    val direction = /*killingDirection ?:*/ foodDirection ?: safeMoves?.randomOrNull() ?: Direction.DOWN
 
     println("MOVE: " + direction)
 
@@ -150,7 +150,7 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board): List<Direction>? {
 //    println(safeMoves)
 
     if (safeMoves.isEmpty()) {
-//        println("no safe moves left, before looking at other snakes!")
+        println("no safe moves left, before looking at other snakes!")
         return null
     }
 
@@ -319,23 +319,21 @@ fun isHazard(position: Position, board: Board): Boolean {
  */
 fun isCollidingWithSnake(position: Position, snake: BattleSnake, board: Board): Boolean {
     var snakeBody = snake.body
-    println("Check colliding with " + snake.name)
+//    println("Check colliding with " + snake.name)
     // only remove the tail, if the body is more than one element
     if (snake.length > 1 && ! hasImmediateFoodMove(snake, board)) {
         snakeBody = snakeBody.subList(0, snake.length - 1 )
-        println("subtracting snake tail!")
+//        println("subtracting snake tail!")
     }
 
     // Step 0: Don't let your Battlesnake move back on its own neck
     for (bodyPosition in snakeBody) {
         // if the given position is on a part of the given battleSnakes body, we are hitting the body
         if (bodyPosition == position) {
-            println("New position is hitting body at " + position + " with body pos: " + bodyPosition)
+//            println("New position is hitting body at " + position + " with body pos: " + bodyPosition)
             return true
         }
     }
-
-    println("no colliding parts found!")
 
     return false
 }
