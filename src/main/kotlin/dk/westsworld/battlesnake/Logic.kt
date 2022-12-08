@@ -4,7 +4,6 @@ package dk.westsworld.battlesnake
 // It defines what to do on your next move
 // You get the current game state passed as a parameter, you only have to return a direction to move into
 fun decideMove(request: MoveRequest): Direction {
-    val head = request.you.head
     println(request)
 
 //    // Finds moves to do, that are still on the map :)
@@ -41,16 +40,14 @@ fun decideMove(request: MoveRequest): Direction {
 //    val safeMoves = getSafeMoves(request.board, request.you)
 
     // we are trying to hunt for food... or go down :)
-    var direction = goTowardsFood(request.you, request.board) ?: Direction.LEFT
-//    if (direction == null) {
-//        if (safeMoves.isNullOrEmpty()) {
-//            direction = Direction.DOWN
-//        } else {
-//            direction = safeMoves.random()
-//        }
-//    }
+    val foodDirection: Direction? = goTowardsFood(request.you, request.board)
+    val killingDirection: Direction? = findPossibleHeadToHeadKillDirection(request.you, request.board)
+    val safeMoves = getSafeMoves(request.you, request.board)
 
-    println("MOVE: " + direction + " @ " + (head + direction))
+
+    val direction = killingDirection ?: foodDirection ?: safeMoves?.randomOrNull() ?: Direction.DOWN
+
+    println("MOVE: " + direction)
 
     return direction
 
@@ -59,7 +56,51 @@ fun decideMove(request: MoveRequest): Direction {
     //return nextMoveIsFood.randomOrNull() ?: goTowardsFood() ?: safeMoves.randomOrNull() ?: Direction.DOWN
 }
 
-fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
+/**
+ * Tries to find a killing head-to-head direction
+ */
+fun findPossibleHeadToHeadKillDirection(currentSnake: BattleSnake, board: Board): Direction? {
+    // first finding all the safe moves
+    var safeMoves = getSafeMoves(currentSnake, board);
+
+    for (snake in board.snakes) {
+        // handle head-to-head collisions
+        safeMoves = safeMoves?.filter { direction ->
+            // Find the next intended position
+            val newPosition = currentSnake.head + direction
+
+            // if our snake is smaller than a snake close to us, do not go TOO close to it's head as it will eat us!
+            var valid = true
+            if (snake.head.adjacent().contains(newPosition)) {
+                // if a snake is close, we might lose head to head
+                valid = false
+                // aha! snake is smaller, try to eat it!
+                if (snake.length < currentSnake.length) {
+                    valid = true
+                }
+            }
+
+            // Only print out this, if the move is valid :)
+            if (valid) {
+                println("Check for head-to-head collision against " + snake.name + " @ " + newPosition)
+                println("Lengths: other vs mine: " + snake.length + "," + currentSnake.length)
+                println("Is snake adjacent? " + snake.head.adjacent().contains(newPosition))
+                println("Direction " + direction)
+                println("Is move valid? " + valid)
+            }
+
+            valid
+        }
+    }
+
+    return safeMoves?.randomOrNull()
+}
+
+/**
+ * finds the moves that are safe to do.
+ * Should this be cached?
+ */
+fun getSafeMoves(currentSnake: BattleSnake, board: Board): List<Direction>? {
     val head = currentSnake.head
     val neck = currentSnake.body[1];
 
@@ -125,8 +166,6 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
             // Find the next intended position
             val newPosition = head + direction
 
-            // TODO: look ahead for the given snake, to check if the position we are choosing, could be chosen by that snake
-
             // checking if the new position is on an opposing snake in the game
             val validMove = !isCollidingWithSnake(newPosition, snake, board)
 
@@ -135,70 +174,71 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
 
             validMove
         }
-
-        // handle head-to-head collisions
-        safeMoves = safeMoves.filter { direction ->
-            // Find the next intended position
-            val newPosition = head + direction
-
-            // if our snake is smaller than a snake close to us, do not go TOO close to it's head as it will eat us!
-            var valid = true
-            if (snake.head.adjacent().contains(newPosition)) {
-                // if a snake is close, we might loose head to head
-                valid = false
-                // aha! snake is smaller, try to eat it!
-                if (snake.length < currentSnake.length) {
-                    valid = true
-                }
-            }
-
-            println("Check for head-to-head collision against " + snake.name + " @ " + newPosition)
-            println("Lengths: other vs mine: " + snake.length + "," + currentSnake.length)
-            println("Is snake adjacent? " + snake.head.adjacent().contains(newPosition))
-            println("Direction " + direction)
-            println("Is move valid? " + valid)
-
-            valid
-        }
     }
 
     return safeMoves
 }
 
+/**
+ * Tries to find a direction to go for food!
+ * @param battleSnake the snake who is looking for food
+ * @param board the current game board
+ * @return The direction to choose or null
+ */
 fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
     var closetFoodPosition: Position? = null;
 
     for (foodPosition in board.food) {
-        // no best
+        // no current best, just grab this food position
         if (closetFoodPosition == null) {
             closetFoodPosition = foodPosition
+        } else {
+            val newDistance = getDistance(battleSnake.head, foodPosition)
+            val currentDistance = getDistance(battleSnake.head, closetFoodPosition)
+
+            if (newDistance < currentDistance) {
+                closetFoodPosition = foodPosition
+            }
         }
     }
 
-    // fetches the list of safe moves, for our snake
-    val safeMoves = getSafeMoves(board, battleSnake)
-
-//    println("Found safeMoves:")
-//    println(safeMoves)
-
-    if (safeMoves.isNullOrEmpty()) {
-        println("No safe moves found in goTowardsFood().. returning UP")
-        return Direction.UP
+    // no food found... return early
+    if (closetFoodPosition == null) {
+        return null
     }
 
-    val head = battleSnake.head;
+    // fetches the list of safe moves, for our snake
+    val safeMoves = getSafeMoves(battleSnake, board)
+
+    if (safeMoves.isNullOrEmpty()) {
+        return null
+    }
 
     // finds the next move, based on the closet food position.
     // we can only advance in a direction, if the move is safe to use
-    if (closetFoodPosition != null && head.x < closetFoodPosition.x && safeMoves.contains(Direction.RIGHT)) {
+    if (battleSnake.head.x < closetFoodPosition.x && safeMoves.contains(Direction.RIGHT)) {
         return Direction.RIGHT
-    } else if (closetFoodPosition != null && head.x > closetFoodPosition.x && safeMoves.contains(Direction.LEFT)) {
+    } else if (battleSnake.head.x > closetFoodPosition.x && safeMoves.contains(Direction.LEFT)) {
         return Direction.LEFT
-    } else if (closetFoodPosition != null && head.y < closetFoodPosition.y && safeMoves.contains(Direction.UP)) {
+    } else if (battleSnake.head.y < closetFoodPosition.y && safeMoves.contains(Direction.UP)) {
         return Direction.UP
-    } else {
+    } else if (battleSnake.head.y > closetFoodPosition.y && safeMoves.contains(Direction.DOWN)) {
         return Direction.DOWN
     }
+
+    return null
+}
+
+/**
+ * Calculating the distance between two points in a 2D matrix
+ * @param position1
+ * @param position2
+ * @return the distance between the two given points
+ */
+fun getDistance(position1: Position, position2: Position): Double {
+    val xPos = (position2.x - position1.x)
+    val yPos = (position2.y - position1.y)
+    return Math.sqrt(Math.pow(xPos.toDouble(), 2.0) + Math.pow(yPos.toDouble(), 2.0))
 }
 
 fun minimax(move: Direction, board: Board): Int {

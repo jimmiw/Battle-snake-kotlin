@@ -1,5 +1,6 @@
 package dk.westsworld.battlesnake
 
+import kotlin.math.roundToInt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -152,7 +153,13 @@ internal class LogicKtTest {
     fun testGetSafeMoves() {
         val request = getMoveRequest()
 
-        var safeMoves = getSafeMoves(request.board, request.you)
+        var safeMoves = getSafeMoves(request.you, request.board)
         println("Test done, found safeMoves: " + safeMoves)
+    }
+
+    @Test
+    fun testGetDistance() {
+        // testing get distance between two points, but rounding the result to int, to make it easier to test :)
+        assertEquals(3, getDistance(Position(1,1), Position(3,3)).roundToInt())
     }
 }
