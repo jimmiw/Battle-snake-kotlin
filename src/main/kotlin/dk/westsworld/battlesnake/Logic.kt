@@ -43,9 +43,13 @@ fun decideMove(request: MoveRequest): Direction {
     val foodDirection: Direction? = goTowardsFood(request.you, request.board)
 //    val killingDirection: Direction? = findPossibleHeadToHeadKillDirection(request.you, request.board)
     val safeMoves = getSafeMoves(request.you, request.board)
+    println("safeMoves: " + safeMoves)
+    // picking a single safe move to use
+    val safeMoveDirection = safeMoves?.randomOrNull()
+    println("food direction: " + foodDirection)
+    println("safe move direction: " + safeMoveDirection)
 
-
-    val direction = /*killingDirection ?:*/ foodDirection ?: safeMoves?.randomOrNull() ?: Direction.DOWN
+    val direction = /*killingDirection ?:*/ foodDirection ?: safeMoveDirection ?: Direction.DOWN
 
     println("MOVE: " + direction)
 
@@ -135,18 +139,6 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board): List<Direction>? {
     }
 
 //    println("Hazard OK moves");
-//    println(safeMoves)
-
-    // are we colliding with ourselves?
-//    safeMoves = safeMoves.filter { direction ->
-//        // Find the next intended position
-//        val newPosition = head + direction
-//
-////        println("Check colliding move @ " + direction)
-//        ! isCollidingWithSnake(newPosition, currentSnake, board)
-//    }
-
-//    println("Colliding OK moves");
 //    println(safeMoves)
 
     if (safeMoves.isEmpty()) {
@@ -239,10 +231,6 @@ fun getDistance(position1: Position, position2: Position): Double {
     val xPos = (position2.x - position1.x)
     val yPos = (position2.y - position1.y)
     return Math.sqrt(Math.pow(xPos.toDouble(), 2.0) + Math.pow(yPos.toDouble(), 2.0))
-}
-
-fun minimax(move: Direction, board: Board): Int {
-    return 0
 }
 
 /**
