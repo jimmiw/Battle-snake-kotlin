@@ -70,8 +70,8 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
         newPosition != neck
     }
 
-    println("Neck OK moves");
-    println(safeMoves)
+//    println("Neck OK moves");
+//    println(safeMoves)
 
     // Finds moves to do, that are still on the map :)
     safeMoves = safeMoves.filter { direction ->
@@ -82,8 +82,8 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
         ! isOutOfBounds(newPosition, board)
     }
 
-    println("Bounds OK moves");
-    println(safeMoves)
+//    println("Bounds OK moves");
+//    println(safeMoves)
 
     // finds the next move, that is NOT a hazard (wall etc.)
     safeMoves = safeMoves.filter { direction ->
@@ -93,29 +93,29 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
         ! isHazard(newPosition, board)
     }
 
-    println("Hazard OK moves");
-    println(safeMoves)
+//    println("Hazard OK moves");
+//    println(safeMoves)
 
     // are we colliding with ourselves?
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
         val newPosition = head + direction
 
-        println("Check colliding move @ " + direction)
+//        println("Check colliding move @ " + direction)
         ! isCollidingWithSnake(newPosition, currentSnake, board)
     }
 
-    println("Colliding OK moves");
-    println(safeMoves)
+//    println("Colliding OK moves");
+//    println(safeMoves)
 
     if (safeMoves.isEmpty()) {
-        println("no safe moves left, before looking at other snakes!")
+//        println("no safe moves left, before looking at other snakes!")
         return null
     }
 
     // avoid other snakes at all costs!
     for (snake in board.snakes) {
-        println("check other snakes: " + snake.name)
+//        println("check other snakes: " + snake.name)
         safeMoves = safeMoves.filter { direction ->
             // Find the next intended position
             val newPosition = head + direction
@@ -125,20 +125,29 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
             // checking if the new position is on an opposing snake in the game
             val validMove = !isCollidingWithSnake(newPosition, snake, board)
 
-            println("check for collision1 " + newPosition)
-            println("Is move valid? " + validMove)
+//            println("check for collision1 " + newPosition)
+//            println("Is move valid? " + validMove)
 
             validMove
         }
 
+        // handle head-to-head collisions
         safeMoves = safeMoves.filter { direction ->
             // Find the next intended position
             val newPosition = head + direction
 
-            // if our snake is smaller than a snake close to us, do not go TOO close to it's head!
-            val valid = ! (snake.length > currentSnake.length && snake.head.adjacent().contains(newPosition))
+            // if our snake is smaller than a snake close to us, do not go TOO close to it's head as it will eat us!
+            var valid = true
+            if (snake.head.adjacent().contains(newPosition)) {
+                // if a snake is close, we might loose head to head
+                valid = false
+                // aha! snake is smaller, try to eat it!
+                if (snake.length < currentSnake.length) {
+                    valid = true
+                }
+            }
 
-            println("Check for collision2 " + newPosition)
+            println("Check for head-to-head collision @ " + newPosition)
             println("Lengths: other vs mine: " + snake.length + "," + currentSnake.length)
             println("Is snake adjacent? " + snake.head.adjacent().contains(newPosition))
             println("Is move valid? " + valid)
@@ -151,25 +160,20 @@ fun getSafeMoves(board: Board, currentSnake: BattleSnake): List<Direction>? {
 }
 
 fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
-    var position: Position? = null;
+    var closetFoodPosition: Position? = null;
 
     for (foodPosition in board.food) {
         // no best
-        if (position == null) {
-            position = foodPosition
+        if (closetFoodPosition == null) {
+            closetFoodPosition = foodPosition
         }
     }
-
-//    // no close foods? just return null
-//    if (closetFoodPosition == null) {
-//        return null
-//    }
 
     // fetches the list of safe moves, for our snake
     val safeMoves = getSafeMoves(board, battleSnake)
 
-    println("Found safeMoves:")
-    println(safeMoves)
+//    println("Found safeMoves:")
+//    println(safeMoves)
 
     if (safeMoves.isNullOrEmpty()) {
         println("No safe moves found in goTowardsFood().. returning UP")
@@ -180,11 +184,11 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
 
     // finds the next move, based on the closet food position.
     // we can only advance in a direction, if the move is safe to use
-    if (position != null && head.x < position.x && safeMoves.contains(Direction.RIGHT)) {
+    if (closetFoodPosition != null && head.x < closetFoodPosition.x && safeMoves.contains(Direction.RIGHT)) {
         return Direction.RIGHT
-    } else if (position != null && head.x > position.x && safeMoves.contains(Direction.LEFT)) {
+    } else if (closetFoodPosition != null && head.x > closetFoodPosition.x && safeMoves.contains(Direction.LEFT)) {
         return Direction.LEFT
-    } else if (position != null && head.y < position.y && safeMoves.contains(Direction.UP)) {
+    } else if (closetFoodPosition != null && head.y < closetFoodPosition.y && safeMoves.contains(Direction.UP)) {
         return Direction.UP
     } else {
         return Direction.DOWN
