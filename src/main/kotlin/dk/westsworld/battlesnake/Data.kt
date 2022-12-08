@@ -77,6 +77,7 @@ enum class GameSource {
     @SerialName("arena") ARENA,
     @SerialName("challenge") CHALLENGE,
     @SerialName("custom") CUSTOM,
+    @SerialName("") CLI_ENGINE,
     @SerialName("ladder") LADDER
 }
 
