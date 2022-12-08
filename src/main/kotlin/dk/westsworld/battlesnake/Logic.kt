@@ -39,25 +39,31 @@ fun decideMove(request: MoveRequest): Direction {
 
 //    val safeMoves = getSafeMoves(request.board, request.you)
 
-    // we are trying to hunt for food... or go down :)
-    val foodDirection: Direction? = goTowardsFood(request.you, request.board)
+    return getMoveDirection(request.you, request.board, 0) ?: Direction.DOWN;
+
+    // Note: we use randomOrNull, so we don't get an exception when we are out of options
+    // Rather, we move down, which will most likely kill us, but at least we do something
+    //return nextMoveIsFood.randomOrNull() ?: goTowardsFood() ?: safeMoves.randomOrNull() ?: Direction.DOWN
+}
+
+fun getMoveDirection(battleSnake: BattleSnake, board: Board, depth: Int): Direction? {
 //    val killingDirection: Direction? = findPossibleHeadToHeadKillDirection(request.you, request.board)
-    val safeMoves = getSafeMoves(request.you, request.board)
+
+    // we are trying to hunt for food... or go down :)
+    val foodDirection: Direction? = goTowardsFood(battleSnake, board)
+    val safeMoves = getSafeMoves(battleSnake, board)
+
     println("safeMoves: " + safeMoves)
     // picking a single safe move to use
     val safeMoveDirection = safeMoves?.randomOrNull()
     println("food direction: " + foodDirection)
     println("safe move direction: " + safeMoveDirection)
 
-    val direction = /*killingDirection ?:*/ foodDirection ?: safeMoveDirection ?: Direction.DOWN
+    val direction = /*killingDirection ?:*/ foodDirection ?: safeMoveDirection
 
     println("MOVE: " + direction)
 
     return direction
-
-    // Note: we use randomOrNull, so we don't get an exception when we are out of options
-    // Rather, we move down, which will most likely kill us, but at least we do something
-    //return nextMoveIsFood.randomOrNull() ?: goTowardsFood() ?: safeMoves.randomOrNull() ?: Direction.DOWN
 }
 
 /**
