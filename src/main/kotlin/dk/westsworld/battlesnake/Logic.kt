@@ -163,24 +163,53 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
  * @return The direction to choose or null
  */
 fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
-    var closetFoodPosition: Position? = null
+//    var closetFoodPosition: Position? = null
+//
+//    // TODO: dumb algo, check if other snakes are near the food as well, since it might be best to go for food that is further away
+//    for (foodPosition in board.food) {
+//        // no current best, just grab this food position
+//        if (closetFoodPosition == null) {
+//            closetFoodPosition = foodPosition
+//        } else {
+//            val newDistance = getDistance(battleSnake.head, foodPosition)
+//            val currentDistance = getDistance(battleSnake.head, closetFoodPosition)
+//
+//            if (newDistance < currentDistance) {
+//                closetFoodPosition = foodPosition
+//            }
+//        }
+//    }
+//
+//    // no food found... return early
+//    if (closetFoodPosition == null) {
+//        return null
+//    }
 
+    var safeFoodPosition: Position? = null
+    // find food, that is not close to other snakes
     for (foodPosition in board.food) {
-        // no current best, just grab this food position
-        if (closetFoodPosition == null) {
-            closetFoodPosition = foodPosition
-        } else {
-            val newDistance = getDistance(battleSnake.head, foodPosition)
-            val currentDistance = getDistance(battleSnake.head, closetFoodPosition)
+        var enemyClosestDistance = 1000000.0
+        val myDistance = getDistance(battleSnake.head, foodPosition)
 
-            if (newDistance < currentDistance) {
-                closetFoodPosition = foodPosition
+        for (snake in board.snakes) {
+            // skip myself
+            if (snake.id == battleSnake.id) {
+                continue
             }
+
+            val distance = getDistance(snake.head, foodPosition)
+            // this enemy is closer to the food, save his distance
+            if (distance < enemyClosestDistance) {
+                enemyClosestDistance = distance
+            }
+        }
+
+        if (enemyClosestDistance > myDistance) {
+            safeFoodPosition = foodPosition
         }
     }
 
-    // no food found... return early
-    if (closetFoodPosition == null) {
+    if (safeFoodPosition == null) {
         return null
     }
 
@@ -193,13 +222,13 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
 
     // finds the next move, based on the closet food position.
     // we can only advance in a direction, if the move is safe to use
-    if (battleSnake.head.x < closetFoodPosition.x && safeMoves.contains(Direction.RIGHT)) {
+    if (battleSnake.head.x < safeFoodPosition.x && safeMoves.contains(Direction.RIGHT)) {
         return Direction.RIGHT
-    } else if (battleSnake.head.x > closetFoodPosition.x && safeMoves.contains(Direction.LEFT)) {
+    } else if (battleSnake.head.x > safeFoodPosition.x && safeMoves.contains(Direction.LEFT)) {
         return Direction.LEFT
-    } else if (battleSnake.head.y < closetFoodPosition.y && safeMoves.contains(Direction.UP)) {
+    } else if (battleSnake.head.y < safeFoodPosition.y && safeMoves.contains(Direction.UP)) {
         return Direction.UP
-    } else if (battleSnake.head.y > closetFoodPosition.y && safeMoves.contains(Direction.DOWN)) {
+    } else if (battleSnake.head.y > safeFoodPosition.y && safeMoves.contains(Direction.DOWN)) {
         return Direction.DOWN
     }
 
