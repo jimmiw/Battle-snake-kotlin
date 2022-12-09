@@ -13,7 +13,7 @@ internal class LogicKtTest {
     }
 
     private fun getMoveRequest(): MoveRequest {
-        var snake = BattleSnake(
+        val snake = BattleSnake(
             "snake id 1",
             "snake1",
             100,
@@ -25,7 +25,7 @@ internal class LogicKtTest {
             "snake squard",
             SnakeCustomization("","","")
         )
-        var snakeTwo = BattleSnake(
+        val snakeTwo = BattleSnake(
             "snake id 2",
             "snake2",
             100,
@@ -37,7 +37,7 @@ internal class LogicKtTest {
             "snake squard 2",
             SnakeCustomization("","","")
         )
-        var snakeThree = BattleSnake(
+        val snakeThree = BattleSnake(
             "snake id 3",
             "snake3",
             100,
@@ -49,7 +49,7 @@ internal class LogicKtTest {
             "snake squard 3",
             SnakeCustomization("","","")
         )
-        var snakeFour = BattleSnake(
+        val snakeFour = BattleSnake(
             "snake id 4",
             "snake4",
             100,
@@ -63,7 +63,7 @@ internal class LogicKtTest {
         )
 
         val board = Board(11, 11, listOf(), listOf(), listOf(snakeTwo,snakeThree,snakeFour))
-        var game = Game(
+        val game = Game(
             "game id 1",
             Ruleset(
                 "Standard",
@@ -79,7 +79,7 @@ internal class LogicKtTest {
             "standard",
             500,
             GameSource.LEAGUE
-        );
+        )
 
         return MoveRequest(
             game,
@@ -94,10 +94,10 @@ internal class LogicKtTest {
 
         val request = getMoveRequest()
 
-        println(decideMove(request));
-        println(decideMove(request));
-//        println(decideMove(request));
-//        println(decideMove(request));
+        println(decideMove(request))
+        println(decideMove(request))
+//        println(decideMove(request))
+//        println(decideMove(request))
     }
 
     @Test
@@ -153,7 +153,7 @@ internal class LogicKtTest {
     fun testGetSafeMoves() {
         val request = getMoveRequest()
 
-        var safeMoves = getSafeMoves(request.you, request.board)
+        val safeMoves = getSafeMoves(request.you, request.board, false)
         println("Test done, found safeMoves: " + safeMoves)
     }
 
