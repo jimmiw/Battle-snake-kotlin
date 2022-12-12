@@ -72,8 +72,8 @@ fun isSafePosition(position: Position, board: Board): Boolean {
 fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
 //    val killingDirection: Direction? = findPossibleHeadToHeadKillDirection(request.you, request.board)
 
-    // we are trying to hunt for food... or go down :)
-    val foodDirection: Direction? = goTowardsFood(battleSnake, board)
+    // we are trying to hunt for food...
+    val foodDirection = goTowardsFood(battleSnake, board)
     val safeMoves = getSafeMoves(battleSnake, board, false)
 
     println("food direction: " + foodDirection)
@@ -87,15 +87,18 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     var bestSpaceLeft = 0
 
     for (move in safeMoves) {
+        println("checking safe move " + move)
         // calculating the battle snake's head position, after the move
         val position = battleSnake.head + move
         // calculating how much space is left, if that move is taken
         val spaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
 
+        println("space left is " + spaceLeft)
+
         if (spaceLeft > bestSpaceLeft) {
             bestSpaceLeft = spaceLeft
             bestDirection = move
-            println("bestDirection: " + bestDirection + " with " + spaceLeft + " space")
+            println("is new bestDirection: " + bestDirection + " with " + spaceLeft + " space")
         }
     }
 
@@ -107,12 +110,12 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
         // if the food move, is the move with the move space left, take it
         if (foodSpaceLeft >= bestSpaceLeft) {
             bestDirection = foodDirection
-            println("foodDirection: " + foodDirection + " with " + foodSpaceLeft + " space - CHOSEN")
+            println("food is new bestDirection: " + foodDirection + " with " + foodSpaceLeft + " space - CHOSEN")
         } else {
             // checking if the food move, can still be used... is there enough room for the snake if it's +1 length?
             if (foodSpaceLeft+1 > battleSnake.length) {
                 bestDirection = foodDirection
-                println("foodDirection: " + foodDirection + " with " + foodSpaceLeft + " space - has enough space for the snake, let's try it out!")
+                println("food is big enough: " + foodDirection + " with " + foodSpaceLeft + " space - has enough space for the snake, let's try it out!")
             }
         }
     }
@@ -225,9 +228,9 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
             if (snake.id != currentSnake.id && ! disregardSafety) {
                 // checking if the given snake is within too close of a distance of the new position
                 val distance = getDistance(snake.head, newPosition)
-                if (distance <= 1.5) {
+                if (distance <= 2) {
                     println("Move " + direction + " is not valid, as it is too close to an other snake")
-                    println("points: " + snake.head + " & " + newPosition)
+                    println("snake vs newPosition: " + snake.head + " & " + newPosition)
                     println("distance: " + distance)
                     validMove = false
                 }
@@ -300,7 +303,7 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
     // fetches the list of safe moves, for our snake
     val safeMoves = getSafeMoves(battleSnake, board, false)
 
-    if (safeMoves.isNullOrEmpty()) {
+    if (safeMoves.isEmpty()) {
         return null
     }
 
