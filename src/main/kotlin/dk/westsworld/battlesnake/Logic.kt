@@ -74,7 +74,7 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
 
     // we are trying to hunt for food...
     val foodDirection = goTowardsFood(battleSnake, board)
-    val safeMoves = getSafeMoves(battleSnake, board, false)
+    var safeMoves = getSafeMoves(battleSnake, board, false)
 
     println("food direction: " + foodDirection)
     println("safeMoves: " + safeMoves)
@@ -120,22 +120,17 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
         }
     }
 
-    // choosing the best direction OR down if all things fail :/
-    return bestDirection ?: Direction.DOWN
+    // direction can be null, if there are no safe moves, where we have looked ahead for possible moves from other snakes
+    if (bestDirection == null) {
+        println("bestDirection was null, finding a less safe move with no lookahead")
+        // find a safe move, but don't lookahead to see a possible dangerous situation
+        safeMoves = getSafeMoves(battleSnake, board, true)
+        bestDirection = safeMoves.randomOrNull() ?: Direction.DOWN
+    }
 
-//    var direction = /*killingDirection ?:*/ foodDirection ?: safeMoveDirection
+    println("final MOVE is: " + bestDirection)
 
-//    // direction can be null, if there are no safe moves, where we have looked ahead for possible moves from other snakes
-//    if (direction == null) {
-//        println("direction was null, finding a less safe move with no lookahead")
-//        // find a safe move, but don't lookahead to see a possible dangerous situation
-//        safeMoves = getSafeMoves(battleSnake, board, true)
-//        direction = safeMoves?.randomOrNull()
-//    }
-//
-//    println("MOVE: " + direction)
-//
-//    return direction
+    return bestDirection
 }
 
 /**
