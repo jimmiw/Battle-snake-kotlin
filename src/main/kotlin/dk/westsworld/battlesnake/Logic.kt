@@ -77,30 +77,30 @@ fun isSafePosition(position: Position, board: Board): Boolean {
 fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     // we are trying to hunt for food...
     val foodDirection = goTowardsFood(battleSnake, board)
-    var safeMoves = getSafeMoves(battleSnake, board, shouldMovesBeSafe())
+//    var safeMoves = getSafeMoves(battleSnake, board, shouldMovesBeSafe())
 
     println("food direction: " + foodDirection)
-    println("safeMoves: " + safeMoves)
+//    println("safeMoves: " + safeMoves)
 
     // finding the optimal move, which is the one with "most space left" after the move has been done
     var bestDirection: Direction? = null
     var bestSpaceLeft = 0
 
-    for (move in safeMoves) {
-        println("checking safe move " + move)
-        // calculating the battle snake's head position, after the move
-        val position = battleSnake.head + move
-        // calculating how much space is left, if that move is taken
-        val spaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
-
-        println("space left is " + spaceLeft)
-
-        if (spaceLeft > bestSpaceLeft) {
-            bestSpaceLeft = spaceLeft
-            bestDirection = move
-            println("is new bestDirection: " + bestDirection + " with " + spaceLeft + " space")
-        }
-    }
+//    for (move in safeMoves) {
+//        println("checking safe move " + move)
+//        // calculating the battle snake's head position, after the move
+//        val position = battleSnake.head + move
+//        // calculating how much space is left, if that move is taken
+//        val spaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
+//
+//        println("space left is " + spaceLeft)
+//
+//        if (spaceLeft > bestSpaceLeft) {
+//            bestSpaceLeft = spaceLeft
+//            bestDirection = move
+//            println("is new bestDirection: " + bestDirection + " with " + spaceLeft + " space")
+//        }
+//    }
 
     // We need to prioritize the food, so, the found food direction is calculated "again"
     if (foodDirection != null) {
@@ -130,7 +130,7 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     if (bestDirection == null) {
         println("bestDirection was null, finding a less safe move with no lookahead")
         // find a safe move, but don't lookahead to see a possible dangerous situation
-        safeMoves = getSafeMoves(battleSnake, board, true)
+        var safeMoves = getSafeMoves(battleSnake, board, shouldMovesBeSafe()) // shouldMovesBeSafe() => false?
         bestDirection = safeMoves.randomOrNull() ?: Direction.DOWN
     }
 
@@ -279,10 +279,13 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
         return null
     }
 
+    println("safe food position is: " + safeFoodPosition)
+
     // using floodfill to find a path to the food
     var route = mutableListOf<Position>();
     var nextPosition = getNextMoveTowardsPosition(battleSnake.head, safeFoodPosition, route, board);
     println("Route is: " + route)
+    println("current head position is: " + battleSnake.head)
     println("suggested new position is: " + nextPosition)
     var nextDirection = battleSnake.head.getDirection(nextPosition ?: Position(0,0))
     println("suggested new direction is: " + nextDirection)
