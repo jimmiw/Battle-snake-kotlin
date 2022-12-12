@@ -26,21 +26,47 @@ fun decideMove(request: MoveRequest): Direction {
 /**
  * Checks how much space the given snake will have, if it makes the given move to the new position.
  */
-fun getSpaceLeft(position: Position, board: Board): Int {
+fun getSpaceLeft(position: Position, board: Board, checkedPositions: MutableList<Position>): Int {
     var space = 0 // should it be 1, since we have already decided on a move?
 
-    // run through the snakes on the board, checking if there is one.
-    for (snake in board.snakes) {
-        if (! snake.body.contains(position)) {
-            // no snake at that position, increment counter
-            space++
-            for (p in position.adjacent()) {
-                space += getSpaceLeft(p, board)
+    // is the given position is safe
+    if (isSafePosition(position, board)) {
+        space++
+        // adding the current element to the list of positions that have already been checked
+        checkedPositions.add(position)
+        // test the positions next to the snake
+        for (p in position.adjacent()) {
+            // skip checked positions :)
+            if (! checkedPositions.contains(p)) {
+                // is the new position safe?
+                if (isSafePosition(p, board)) {
+                    space += getSpaceLeft(p, board, checkedPositions)
+                }
             }
         }
     }
 
     return space
+}
+
+/**
+ * Checking if the given position on the board is safe
+ */
+fun isSafePosition(position: Position, board: Board): Boolean {
+    if (isOutOfBounds(position, board)) {
+        return false
+    }
+    if (isHazard(position, board)) {
+        return false
+    }
+
+    for (snake in board.snakes) {
+        if (isCollidingWithSnake(position, snake, board)) {
+            return false
+        }
+    }
+
+    return true
 }
 
 fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
@@ -64,7 +90,7 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
         // calculating the battle snake's head position, after the move
         val position = battleSnake.head + move
         // calculating how much space is left, if that move is taken
-        val spaceLeft = getSpaceLeft(position, board)
+        val spaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
 
         if (spaceLeft > bestSpaceLeft) {
             bestSpaceLeft = spaceLeft
@@ -76,7 +102,7 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     // We need to prioritize the food, so, the found food direction is calculated "again"
     if (foodDirection != null) {
         val position = battleSnake.head + foodDirection
-        val foodSpaceLeft = getSpaceLeft(position, board)
+        val foodSpaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
 
         // if the food move, is the move with the move space left, take it
         if (foodSpaceLeft >= bestSpaceLeft) {
