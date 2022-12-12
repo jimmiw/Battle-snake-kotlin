@@ -12,6 +12,47 @@ internal class LogicKtTest {
         assert(true)
     }
 
+    private fun getSoloFoodMoveRequest(snakePosition: Position, snakeBody: List<Position>, foodList: List<Position>): MoveRequest {
+        val snake = BattleSnake(
+            "snake id 1",
+            "snake1",
+            100,
+            snakeBody,
+            "111",
+            snakePosition,
+            snakeBody.size,
+            "",
+            "snake squard",
+            SnakeCustomization("","","")
+        )
+
+        val board = Board(3, 3, foodList, listOf(), listOf(snake))
+        val game = Game(
+            "game id 1",
+            Ruleset(
+                "Standard",
+                "v1.2.3",
+                RulesetSettings(
+                    15,
+                    1,
+                    14,
+                    null,
+                    null
+                )
+            ),
+            "standard",
+            500,
+            GameSource.LEAGUE
+        )
+
+        return MoveRequest(
+            game,
+            2,
+            board,
+            snake
+        )
+    }
+
     private fun getMoveRequest(): MoveRequest {
         val snake = BattleSnake(
             "snake id 1",
@@ -62,7 +103,7 @@ internal class LogicKtTest {
             SnakeCustomization("","","")
         )
 
-        val board = Board(11, 11, listOf(), listOf(), listOf(snakeTwo,snakeThree,snakeFour))
+        val board = Board(11, 11, listOf(), listOf(), listOf(snake, snakeTwo,snakeThree,snakeFour))
         val game = Game(
             "game id 1",
             Ruleset(
@@ -98,6 +139,22 @@ internal class LogicKtTest {
         println(decideMove(request))
 //        println(decideMove(request))
 //        println(decideMove(request))
+    }
+
+    @Test
+    fun testFindFood() {
+        var request = getSoloFoodMoveRequest(
+            Position(1,0),
+            listOf(Position(1,0), Position(0,0)),
+            listOf()
+        );
+
+        var route = mutableListOf<Position>()
+        var nextPosition = getNextMoveTowardsPosition(request.you.head, Position(0,0), route, request.board)
+        println("Route is: " + route)
+        println("suggested new position is: " + nextPosition)
+        var nextDirection = request.you.head.getDirection(nextPosition ?: Position(0,0))
+        println("suggested new direction is: " + nextDirection)
     }
 
     @Test

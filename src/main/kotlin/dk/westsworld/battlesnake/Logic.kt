@@ -251,28 +251,6 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
  * @return The direction to choose or null
  */
 fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
-//    var closetFoodPosition: Position? = null
-//
-//    // TODO: dumb algo, check if other snakes are near the food as well, since it might be best to go for food that is further away
-//    for (foodPosition in board.food) {
-//        // no current best, just grab this food position
-//        if (closetFoodPosition == null) {
-//            closetFoodPosition = foodPosition
-//        } else {
-//            val newDistance = getDistance(battleSnake.head, foodPosition)
-//            val currentDistance = getDistance(battleSnake.head, closetFoodPosition)
-//
-//            if (newDistance < currentDistance) {
-//                closetFoodPosition = foodPosition
-//            }
-//        }
-//    }
-//
-//    // no food found... return early
-//    if (closetFoodPosition == null) {
-//        return null
-//    }
-
     var safeFoodPosition: Position? = null
     // find food, that is not close to other snakes
     for (foodPosition in board.food) {
@@ -301,23 +279,69 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
         return null
     }
 
-    // fetches the list of safe moves, for our snake
-    val safeMoves = getSafeMoves(battleSnake, board, shouldMovesBeSafe())
+    // using floodfill to find a path to the food
+    var route = mutableListOf<Position>();
+    var nextPosition = getNextMoveTowardsPosition(battleSnake.head, safeFoodPosition, route, board);
+    println("Route is: " + route)
+    println("suggested new position is: " + nextPosition)
+    var nextDirection = battleSnake.head.getDirection(nextPosition ?: Position(0,0))
+    println("suggested new direction is: " + nextDirection)
 
-    if (safeMoves.isEmpty()) {
-        return null
-    }
+    return nextDirection
 
-    // finds the next move, based on the closet food position.
-    // we can only advance in a direction, if the move is safe to use
-    if (battleSnake.head.x < safeFoodPosition.x && safeMoves.contains(Direction.RIGHT)) {
-        return Direction.RIGHT
-    } else if (battleSnake.head.x > safeFoodPosition.x && safeMoves.contains(Direction.LEFT)) {
-        return Direction.LEFT
-    } else if (battleSnake.head.y < safeFoodPosition.y && safeMoves.contains(Direction.UP)) {
-        return Direction.UP
-    } else if (battleSnake.head.y > safeFoodPosition.y && safeMoves.contains(Direction.DOWN)) {
-        return Direction.DOWN
+
+//    // fetches the list of safe moves, for our snake
+//    val safeMoves = getSafeMoves(battleSnake, board, shouldMovesBeSafe())
+//
+//    if (safeMoves.isEmpty()) {
+//        return null
+//    }
+//
+//    // finds the next move, based on the closet food position.
+//    // we can only advance in a direction, if the move is safe to use
+//    if (battleSnake.head.x < safeFoodPosition.x && safeMoves.contains(Direction.RIGHT)) {
+//        return Direction.RIGHT
+//    } else if (battleSnake.head.x > safeFoodPosition.x && safeMoves.contains(Direction.LEFT)) {
+//        return Direction.LEFT
+//    } else if (battleSnake.head.y < safeFoodPosition.y && safeMoves.contains(Direction.UP)) {
+//        return Direction.UP
+//    } else if (battleSnake.head.y > safeFoodPosition.y && safeMoves.contains(Direction.DOWN)) {
+//        return Direction.DOWN
+//    }
+//
+//    return null
+}
+
+/**
+ * Suggests the next direction to walk in, to get to the given position.
+ * NOTE: using floodfill to calculate the next step :)
+ */
+fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: Position, route: MutableList<Position>, board: Board): Position? {
+    if (currentPosition == destinationPosition) {
+        // if the first possible destination is the food, return it!
+        return if (route.isEmpty()) {
+            destinationPosition
+        } else {
+            route.first()
+        }
+    } else {
+        for (position in currentPosition.adjacent()) {
+            if (isSafePosition(position, board)) {
+                if (!route.contains(position)) {
+                    // adding the current position to our route towards the destination!
+                    route.add(position)
+
+                    val nextMove = getNextMoveTowardsPosition(position, destinationPosition, route, board)
+
+                    if (nextMove == null) {
+                        // no route found, remove position, return null
+                        route.removeLast()
+                    } else {
+                        return nextMove
+                    }
+                }
+            }
+        }
     }
 
     return null

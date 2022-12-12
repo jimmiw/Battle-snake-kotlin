@@ -25,7 +25,19 @@ val Direction.position get() = when (this) {
 
 // Data structure that holds an x and y value
 @Serializable
-data class Position(val x: Int, val y: Int)
+data class Position(val x: Int, val y: Int) {
+    fun getDirection(position: Position): Direction {
+        return if (this + Direction.UP == position) {
+            Direction.UP
+        } else if (this + Direction.DOWN == position) {
+            Direction.DOWN
+        } else if (this + Direction.RIGHT == position) {
+            Direction.RIGHT
+        } else {
+            Direction.LEFT
+        }
+    }
+}
 
 // Utility for working with positions
 // (basic math)
