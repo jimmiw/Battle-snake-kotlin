@@ -20,35 +20,93 @@ fun decideMove(request: MoveRequest): Direction {
 //    return bestMove
 
 
-    return getMoveDirection(request.you, request.board, 0) ?: Direction.DOWN
+    return getMoveDirection(request.you, request.board)
 }
 
-fun getMoveDirection(battleSnake: BattleSnake, board: Board, depth: Int): Direction? {
+/**
+ * Checks how much space the given snake will have, if it makes the given move to the new position.
+ */
+fun getSpaceLeft(position: Position, board: Board): Int {
+    var space = 0 // should it be 1, since we have already decided on a move?
+
+    // run through the snakes on the board, checking if there is one.
+    for (snake in board.snakes) {
+        if (! snake.body.contains(position)) {
+            // no snake at that position, increment counter
+            space++
+            for (p in position.adjacent()) {
+                space += getSpaceLeft(p, board)
+            }
+        }
+    }
+
+    return space
+}
+
+fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
 //    val killingDirection: Direction? = findPossibleHeadToHeadKillDirection(request.you, request.board)
 
     // we are trying to hunt for food... or go down :)
     val foodDirection: Direction? = goTowardsFood(battleSnake, board)
-    var safeMoves = getSafeMoves(battleSnake, board, false)
+    val safeMoves = getSafeMoves(battleSnake, board, false)
 
+    println("food direction: " + foodDirection)
     println("safeMoves: " + safeMoves)
     // picking a single safe move to use
-    val safeMoveDirection = safeMoves?.randomOrNull()
-    println("food direction: " + foodDirection)
-    println("safe move direction: " + safeMoveDirection)
+//    val safeMoveDirection = safeMoves.randomOrNull()
+//    println("safe move direction: " + safeMoveDirection)
 
-    var direction = /*killingDirection ?:*/ foodDirection ?: safeMoveDirection
+    // finding the optimal move, which is the one with "most space left" after the move has been done
+    var bestDirection: Direction? = null
+    var bestSpaceLeft = 0
 
-    // direction can be null, if there are no safe moves, where we have looked ahead for possible moves from other snakes
-    if (direction == null) {
-        println("direction was null, finding a less safe move with no lookahead")
-        // find a safe move, but don't lookahead to see a possible dangerous situation
-        safeMoves = getSafeMoves(battleSnake, board, true)
-        direction = safeMoves?.randomOrNull()
+    for (move in safeMoves) {
+        // calculating the battle snake's head position, after the move
+        val position = battleSnake.head + move
+        // calculating how much space is left, if that move is taken
+        val spaceLeft = getSpaceLeft(position, board)
+
+        if (spaceLeft > bestSpaceLeft) {
+            bestSpaceLeft = spaceLeft
+            bestDirection = move
+            println("bestDirection: " + bestDirection + " with " + spaceLeft + " space")
+        }
     }
 
-    println("MOVE: " + direction)
+    // We need to prioritize the food, so, the found food direction is calculated "again"
+    if (foodDirection != null) {
+        val position = battleSnake.head + foodDirection
+        val foodSpaceLeft = getSpaceLeft(position, board)
 
-    return direction
+        // if the food move, is the move with the move space left, take it
+        if (foodSpaceLeft >= bestSpaceLeft) {
+            bestDirection = foodDirection
+            println("foodDirection: " + foodDirection + " with " + foodSpaceLeft + " space - CHOSEN")
+        } else {
+            // checking if the food move, can still be used... is there enough room for the snake if it's +1 length?
+            if (foodSpaceLeft+1 > battleSnake.length) {
+                bestDirection = foodDirection
+                println("foodDirection: " + foodDirection + " with " + foodSpaceLeft + " space - has enough space for the snake, let's try it out!")
+            }
+        }
+    }
+
+    // choosing the best direction OR down if all things fail :/
+    return bestDirection ?: Direction.DOWN
+
+//    var direction = /*killingDirection ?:*/ foodDirection ?: safeMoveDirection
+
+//    // direction can be null, if there are no safe moves, where we have looked ahead for possible moves from other snakes
+//    if (direction == null) {
+//        println("direction was null, finding a less safe move with no lookahead")
+//        // find a safe move, but don't lookahead to see a possible dangerous situation
+//        safeMoves = getSafeMoves(battleSnake, board, true)
+//        direction = safeMoves?.randomOrNull()
+//    }
+//
+//    println("MOVE: " + direction)
+//
+//    return direction
 }
 
 /**
@@ -60,7 +118,7 @@ fun findPossibleHeadToHeadKillDirection(currentSnake: BattleSnake, board: Board)
 
     for (snake in board.snakes) {
         // handle head-to-head collisions
-        safeMoves = safeMoves?.filter { direction ->
+        safeMoves = safeMoves.filter { direction ->
             // Find the next intended position
             val newPosition = currentSnake.head + direction
 
@@ -88,14 +146,14 @@ fun findPossibleHeadToHeadKillDirection(currentSnake: BattleSnake, board: Board)
         }
     }
 
-    return safeMoves?.randomOrNull()
+    return safeMoves.randomOrNull()
 }
 
 /**
  * finds the moves that are safe to do.
  * Should this be cached?
  */
-fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boolean): List<Direction>? {
+fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boolean): List<Direction> {
     val head = currentSnake.head
     val neck = currentSnake.body[1]
 
@@ -125,7 +183,7 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
 
     if (safeMoves.isEmpty()) {
         println("no safe moves left, before looking at other snakes!")
-        return null
+        return listOf<Direction>()
     }
 
     // avoid all snakes at all costs!
