@@ -1,10 +1,15 @@
 package dk.westsworld.battlesnake
 
+var game: Game? = null
+//= Game("", Ruleset("", "", RulesetSettings(1,1,1,null, null)), null, 1, null)
+
 // This is the heart of your snake
 // It defines what to do on your next move
 // You get the current game state passed as a parameter, you only have to return a direction to move into
 fun decideMove(request: MoveRequest): Direction {
     println(request)
+
+    game = request.game
 //
 //    var bestScore = -10000;
 //    var bestMove = Direction.DOWN;
@@ -70,17 +75,12 @@ fun isSafePosition(position: Position, board: Board): Boolean {
 }
 
 fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
-//    val killingDirection: Direction? = findPossibleHeadToHeadKillDirection(request.you, request.board)
-
     // we are trying to hunt for food...
     val foodDirection = goTowardsFood(battleSnake, board)
-    var safeMoves = getSafeMoves(battleSnake, board, false)
+    var safeMoves = getSafeMoves(battleSnake, board, shouldMovesBeSafe())
 
     println("food direction: " + foodDirection)
     println("safeMoves: " + safeMoves)
-    // picking a single safe move to use
-//    val safeMoveDirection = safeMoves.randomOrNull()
-//    println("safe move direction: " + safeMoveDirection)
 
     // finding the optimal move, which is the one with "most space left" after the move has been done
     var bestDirection: Direction? = null
@@ -107,15 +107,21 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
         val position = battleSnake.head + foodDirection
         val foodSpaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
 
-        // if the food move, is the move with the move space left, take it
-        if (foodSpaceLeft >= bestSpaceLeft) {
+        // if it's a solo map, we should ALWAYS go for the food
+        if (isSoloMap()) {
             bestDirection = foodDirection
-            println("food is new bestDirection: " + foodDirection + " with " + foodSpaceLeft + " space - CHOSEN")
+            println("solo map, food direction is always best: " + foodDirection)
         } else {
-            // checking if the food move, can still be used... is there enough room for the snake if it's +1 length?
-            if (foodSpaceLeft+1 > battleSnake.length) {
+            // if the food move, is the move with the move space left, take it
+            if (foodSpaceLeft >= bestSpaceLeft) {
                 bestDirection = foodDirection
-                println("food is big enough: " + foodDirection + " with " + foodSpaceLeft + " space - has enough space for the snake, let's try it out!")
+                println("food is new bestDirection: " + foodDirection + " with " + foodSpaceLeft + " space - CHOSEN")
+            } else {
+                // checking if the food move, can still be used... is there enough room for the snake if it's +1 length?
+                if (foodSpaceLeft + 1 > battleSnake.length) {
+                    bestDirection = foodDirection
+                    println("food is big enough: " + foodDirection + " with " + foodSpaceLeft + " space - has enough space for the snake, let's try it out!")
+                }
             }
         }
     }
@@ -138,7 +144,7 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
  */
 fun findPossibleHeadToHeadKillDirection(currentSnake: BattleSnake, board: Board): Direction? {
     // first finding all the safe moves
-    var safeMoves = getSafeMoves(currentSnake, board, false)
+    var safeMoves = getSafeMoves(currentSnake, board, shouldMovesBeSafe())
 
     for (snake in board.snakes) {
         // handle head-to-head collisions
@@ -296,7 +302,7 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
     }
 
     // fetches the list of safe moves, for our snake
-    val safeMoves = getSafeMoves(battleSnake, board, false)
+    val safeMoves = getSafeMoves(battleSnake, board, shouldMovesBeSafe())
 
     if (safeMoves.isEmpty()) {
         return null
@@ -315,6 +321,15 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
     }
 
     return null
+}
+
+private fun shouldMovesBeSafe(): Boolean {
+    // ZOMG had to do a nasty switcharooooooo... if the game starts with solo, return true REVERSE!
+    return ! isSoloMap()
+}
+
+private fun isSoloMap(): Boolean {
+    return game?.map?.startsWith("solo") ?: false
 }
 
 /**
