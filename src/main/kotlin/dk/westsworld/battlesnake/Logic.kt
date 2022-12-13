@@ -72,7 +72,12 @@ fun isSafePosition(position: Position, board: Board): Boolean {
 
 fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     // we are trying to hunt for food...
-    val foodDirection = goTowardsFood(battleSnake, board)
+    val foodDirection = if (shouldFindFood(battleSnake)) {
+        goTowardsFood(battleSnake, board)
+    } else {
+        null
+    }
+
     var safeMoves = getSafeMoves(battleSnake, board, shouldMovesBeSafe())
 
 //    println("food direction: " + foodDirection)
@@ -132,6 +137,19 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     }
 
     return bestDirection
+}
+
+/**
+ * Tests if the snake should go for food!
+ */
+fun shouldFindFood(battleSnake: BattleSnake): Boolean {
+    if (isSoloMap()) {
+        return true
+    } else if (battleSnake.length > 50) {
+        return false
+    }
+
+    return true
 }
 
 /**
@@ -246,34 +264,6 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
  * @return The direction to choose or null
  */
 fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
-//    var safeFoodPosition: Position? = null
-//    // find food, that is not close to other snakes
-//    for (foodPosition in board.food) {
-//        var enemyClosestDistance = 1000000.0
-//        val myDistance = getDistance(battleSnake.head, foodPosition)
-//
-//        for (snake in board.snakes) {
-//            // skip myself
-//            if (snake.id == battleSnake.id) {
-//                continue
-//            }
-//
-//            val distance = getDistance(snake.head, foodPosition)
-//            // this enemy is closer to the food, save his distance
-//            if (distance < enemyClosestDistance) {
-//                enemyClosestDistance = distance
-//            }
-//        }
-//
-//        if (enemyClosestDistance > myDistance) {
-//            safeFoodPosition = foodPosition
-//        }
-//    }
-//
-//    if (safeFoodPosition == null) {
-//        return null
-//    }
-
     var safeFoodPosition: Position? = null
     var distanceToFood = 100000.0
     for (foodPosition in board.food) {
@@ -289,7 +279,6 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
         return null
     }
 
-//    println("safe food position is: " + safeFoodPosition)
 
     // using floodfill to find a path to the food
     var route = mutableListOf<Position>();
