@@ -77,30 +77,30 @@ fun isSafePosition(position: Position, board: Board): Boolean {
 fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     // we are trying to hunt for food...
     val foodDirection = goTowardsFood(battleSnake, board)
-//    var safeMoves = getSafeMoves(battleSnake, board, shouldMovesBeSafe())
+    var safeMoves = getSafeMoves(battleSnake, board, shouldMovesBeSafe())
 
     println("food direction: " + foodDirection)
-//    println("safeMoves: " + safeMoves)
+    println("safeMoves: " + safeMoves)
 
     // finding the optimal move, which is the one with "most space left" after the move has been done
     var bestDirection: Direction? = null
     var bestSpaceLeft = 0
 
-//    for (move in safeMoves) {
+    for (move in safeMoves) {
 //        println("checking safe move " + move)
-//        // calculating the battle snake's head position, after the move
-//        val position = battleSnake.head + move
-//        // calculating how much space is left, if that move is taken
-//        val spaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
-//
+        // calculating the battle snake's head position, after the move
+        val position = battleSnake.head + move
+        // calculating how much space is left, if that move is taken
+        val spaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
+
 //        println("space left is " + spaceLeft)
-//
-//        if (spaceLeft > bestSpaceLeft) {
-//            bestSpaceLeft = spaceLeft
-//            bestDirection = move
+
+        if (spaceLeft > bestSpaceLeft) {
+            bestSpaceLeft = spaceLeft
+            bestDirection = move
 //            println("is new bestDirection: " + bestDirection + " with " + spaceLeft + " space")
-//        }
-//    }
+        }
+    }
 
     // We need to prioritize the food, so, the found food direction is calculated "again"
     if (foodDirection != null) {
@@ -130,7 +130,7 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     if (bestDirection == null) {
         println("bestDirection was null, finding a less safe move with no lookahead")
         // find a safe move, but don't lookahead to see a possible dangerous situation
-        var safeMoves = getSafeMoves(battleSnake, board, shouldMovesBeSafe()) // shouldMovesBeSafe() => false?
+        safeMoves = getSafeMoves(battleSnake, board, false) // shouldMovesBeSafe() => false?
         bestDirection = safeMoves.randomOrNull() ?: Direction.DOWN
     }
 
@@ -251,26 +251,41 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
  * @return The direction to choose or null
  */
 fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
+//    var safeFoodPosition: Position? = null
+//    // find food, that is not close to other snakes
+//    for (foodPosition in board.food) {
+//        var enemyClosestDistance = 1000000.0
+//        val myDistance = getDistance(battleSnake.head, foodPosition)
+//
+//        for (snake in board.snakes) {
+//            // skip myself
+//            if (snake.id == battleSnake.id) {
+//                continue
+//            }
+//
+//            val distance = getDistance(snake.head, foodPosition)
+//            // this enemy is closer to the food, save his distance
+//            if (distance < enemyClosestDistance) {
+//                enemyClosestDistance = distance
+//            }
+//        }
+//
+//        if (enemyClosestDistance > myDistance) {
+//            safeFoodPosition = foodPosition
+//        }
+//    }
+//
+//    if (safeFoodPosition == null) {
+//        return null
+//    }
+
     var safeFoodPosition: Position? = null
-    // find food, that is not close to other snakes
+    var distanceToFood = 100000.0
     for (foodPosition in board.food) {
-        var enemyClosestDistance = 1000000.0
-        val myDistance = getDistance(battleSnake.head, foodPosition)
+        val distance = getDistance(battleSnake.head, foodPosition)
 
-        for (snake in board.snakes) {
-            // skip myself
-            if (snake.id == battleSnake.id) {
-                continue
-            }
-
-            val distance = getDistance(snake.head, foodPosition)
-            // this enemy is closer to the food, save his distance
-            if (distance < enemyClosestDistance) {
-                enemyClosestDistance = distance
-            }
-        }
-
-        if (enemyClosestDistance > myDistance) {
+        if (distance < distanceToFood) {
+            distanceToFood = distance
             safeFoodPosition = foodPosition
         }
     }
@@ -324,7 +339,7 @@ fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: P
     val maxDepth = if (isSoloMap()) {
         100
     } else {
-        10
+        20
     }
 
     if (depth > maxDepth) {
