@@ -320,7 +320,7 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
  * NOTE: using floodfill to calculate the next step :)
  */
 fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: Position, route: MutableList<Position>, board: Board, depth: Int): Position? {
-    if (depth > 70) {
+    if (depth > 20) {
         println("stopping because of max depth!")
         return route.first()
     }
