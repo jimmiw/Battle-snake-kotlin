@@ -12,20 +12,6 @@ fun decideMove(request: MoveRequest): Direction {
 //    println(request)
 
     game = request.game
-//
-//    var bestScore = -10000;
-//    var bestMove = Direction.DOWN;
-//
-//    for (move in movesAvailable) {
-//        val score = minimax(move, request.board)
-//        if (score > bestScore) {
-//            bestScore = score
-//            bestMove = move
-//        }
-//    }
-//
-//    return bestMove
-
 
     var direction = Direction.UP
     var time = measureTimeMillis {
@@ -310,8 +296,8 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
     var route = mutableListOf<Position>();
     var nextPosition = getNextMoveTowardsPosition(battleSnake.head, safeFoodPosition, route, board, 0)
 //    println("Route is: " + route)
-//    println("current head position is: " + battleSnake.head)
-//    println("suggested new position is: " + nextPosition)
+    println("current head position is: " + battleSnake.head)
+    println("suggested new position is: " + nextPosition)
     var nextDirection = battleSnake.head.getDirection(nextPosition ?: Position(0,0))
     println("suggested new direction is: " + nextDirection)
 
