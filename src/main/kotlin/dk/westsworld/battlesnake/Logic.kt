@@ -294,8 +294,18 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
 
     // using floodfill to find a path to the food
     var route = mutableListOf<Position>();
-    var nextPosition = getNextMoveTowardsPosition(battleSnake.head, safeFoodPosition, route, board, 0)
-//    println("Route is: " + route)
+    println("safe food position is: " + safeFoodPosition)
+
+    // when solo mapping, allow 100 moves as "ok" :)
+    val maxDepth = if (isSoloMap()) {
+        100
+    } else {
+        // calculate the "best length" to the food
+        (getDistance(battleSnake.head, safeFoodPosition) * 3).toInt()
+    }
+
+    var nextPosition = getNextMoveTowardsPosition(battleSnake.head, safeFoodPosition, route, board, maxDepth)
+    println("Route is: " + route)
     println("current head position is: " + battleSnake.head)
     println("suggested new position is: " + nextPosition)
     var nextDirection = battleSnake.head.getDirection(nextPosition ?: Position(0,0))
@@ -330,16 +340,9 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
  * Suggests the next direction to walk in, to get to the given position.
  * NOTE: using floodfill to calculate the next step :)
  */
-fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: Position, route: MutableList<Position>, board: Board, depth: Int): Position? {
-    // when solo mapping, allow 100 moves as "ok" :)
-    val maxDepth = if (isSoloMap()) {
-        100
-    } else {
-        10
-    }
-
-    if (depth > maxDepth) {
-//        println("quitting path because of max depth!")
+fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: Position, route: MutableList<Position>, board: Board, maxDepth: Int): Position? {
+    if (maxDepth < 1) {
+        println("quitting path because of max depth!")
         return null
     }
 
@@ -351,14 +354,14 @@ fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: P
             route.first()
         }
     } else {
-//        println("" + currentPosition + " adjacent " + currentPosition.adjacent())
+        println("" + currentPosition + " adjacent " + currentPosition.adjacent())
         for (position in currentPosition.adjacent()) {
             if (isSafePosition(position, board)) {
                 if (!route.contains(position)) {
                     // adding the current position to our route towards the destination!
                     route.add(position)
 
-                    val nextMove = getNextMoveTowardsPosition(position, destinationPosition, route, board, depth + 1)
+                    val nextMove = getNextMoveTowardsPosition(position, destinationPosition, route, board, maxDepth - 1)
 
                     if (nextMove == null) {
                         // no route found, remove position, return null
