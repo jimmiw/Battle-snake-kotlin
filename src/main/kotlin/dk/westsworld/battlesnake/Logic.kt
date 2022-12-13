@@ -212,7 +212,7 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
     }
 
     if (safeMoves.isEmpty()) {
-        println("no safe moves left, before looking at other snakes!")
+//        println("no safe moves left, before looking at other snakes!")
         return listOf<Direction>()
     }
 
@@ -229,10 +229,10 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
             if (snake.id != currentSnake.id && ! disregardSafety) {
                 // checking if the given snake is within too close of a distance of the new position
                 val distance = getDistance(snake.head, newPosition)
-                if (distance <= 2) {
-                    println("Move " + direction + " is not valid, as it is too close to an other snake")
-                    println("snake vs newPosition: " + snake.head + " & " + newPosition)
-                    println("distance: " + distance)
+                if (distance <= 1.2) {
+//                    println("Move " + direction + " is not valid, as it is too close to an other snake")
+//                    println("snake vs newPosition: " + snake.head + " & " + newPosition)
+//                    println("distance: " + distance)
                     validMove = false
                 }
             }
@@ -294,14 +294,14 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
         return null
     }
 
-    println("safe food position is: " + safeFoodPosition)
+//    println("safe food position is: " + safeFoodPosition)
 
     // using floodfill to find a path to the food
     var route = mutableListOf<Position>();
     var nextPosition = getNextMoveTowardsPosition(battleSnake.head, safeFoodPosition, route, board, 0)
-    println("Route is: " + route)
-    println("current head position is: " + battleSnake.head)
-    println("suggested new position is: " + nextPosition)
+//    println("Route is: " + route)
+//    println("current head position is: " + battleSnake.head)
+//    println("suggested new position is: " + nextPosition)
     var nextDirection = battleSnake.head.getDirection(nextPosition ?: Position(0,0))
     println("suggested new direction is: " + nextDirection)
 
@@ -343,7 +343,7 @@ fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: P
     }
 
     if (depth > maxDepth) {
-        println("quitting path because of max depth!")
+//        println("quitting path because of max depth!")
         return null
     }
 
@@ -355,7 +355,7 @@ fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: P
             route.first()
         }
     } else {
-        println("" + currentPosition + " adjacent " + currentPosition.adjacent())
+//        println("" + currentPosition + " adjacent " + currentPosition.adjacent())
         for (position in currentPosition.adjacent()) {
             if (isSafePosition(position, board)) {
                 if (!route.contains(position)) {
