@@ -151,6 +151,24 @@ internal class LogicKtTest {
     }
 
     @Test
+    fun testMoveFindFoodParsing2() {
+        val serializer = Json {
+            isLenient = true
+            ignoreUnknownKeys = true
+        }
+
+        var request = serializer.decodeFromString<MoveRequest>("{\"game\":{\"id\":\"d4d793b4-830c-4257-b2a4-2adaa2f41688\",\"ruleset\":{\"name\":\"standard\",\"version\":\"cli\",\"settings\":{\"foodSpawnChance\":15,\"minimumFood\":1,\"hazardDamagePerTurn\":14,\"hazardMap\":\"\",\"hazardMapAuthor\":\"\",\"royale\":{\"shrinkEveryNTurns\":25},\"squad\":{\"allowBodyCollisions\":false,\"sharedElimination\":false,\"sharedHealth\":false,\"sharedLength\":false}}},\"map\":\"standard\",\"timeout\":2000,\"source\":\"\"},\"turn\":6,\"board\":{\"height\":11,\"width\":11,\"snakes\":[{\"id\":\"e423aef6-6a4c-4853-80ea-769063173020\",\"name\":\"Frankies\",\"latency\":\"21\",\"health\":96,\"body\":[{\"x\":6,\"y\":4},{\"x\":7,\"y\":4},{\"x\":8,\"y\":4},{\"x\":9,\"y\":4}],\"head\":{\"x\":6,\"y\":4},\"length\":4,\"shout\":\"\",\"squad\":\"\",\"customizations\":{\"color\":\"#FFFF33\",\"head\":\"whale\",\"tail\":\"dragon\"}},{\"id\":\"ffb518c0-a8fe-4a58-8693-d7662bff9015\",\"name\":\"Fredeberg\",\"latency\":\"67\",\"health\":96,\"body\":[{\"x\":4,\"y\":6},{\"x\":3,\"y\":6},{\"x\":2,\"y\":6},{\"x\":1,\"y\":6}],\"head\":{\"x\":4,\"y\":6},\"length\":4,\"shout\":\"\",\"squad\":\"\",\"customizations\":{\"color\":\"#00FF00\",\"head\":\"alligator\",\"tail\":\"alligator\"}},{\"id\":\"a48cbdb2-6875-4059-ba7a-f86c6a34544a\",\"name\":\"Jimseloms\",\"latency\":\"4\",\"health\":96,\"body\":[{\"x\":6,\"y\":6},{\"x\":6,\"y\":7},{\"x\":6,\"y\":8},{\"x\":6,\"y\":9}],\"head\":{\"x\":6,\"y\":6},\"length\":4,\"shout\":\"\",\"squad\":\"\",\"customizations\":{\"color\":\"#670000\",\"head\":\"sneaky\",\"tail\":\"skinny-jeans\"}}],\"food\":[{\"x\":5,\"y\":5}],\"hazards\":[]},\"you\":{\"id\":\"a48cbdb2-6875-4059-ba7a-f86c6a34544a\",\"name\":\"Jimseloms\",\"latency\":\"0\",\"health\":96,\"body\":[{\"x\":6,\"y\":6},{\"x\":6,\"y\":7},{\"x\":6,\"y\":8},{\"x\":6,\"y\":9}],\"head\":{\"x\":6,\"y\":6},\"length\":4,\"shout\":\"\",\"squad\":\"\",\"customizations\":{\"color\":\"#670000\",\"head\":\"sneaky\",\"tail\":\"skinny-jeans\"}}}")
+        var direction = decideMove(request)
+        println("Move 1: " + direction)
+//        assertEquals(Direction.UP, direction)
+
+        request = serializer.decodeFromString<MoveRequest>("{\"game\":{\"id\":\"d4d793b4-830c-4257-b2a4-2adaa2f41688\",\"ruleset\":{\"name\":\"standard\",\"version\":\"cli\",\"settings\":{\"foodSpawnChance\":15,\"minimumFood\":1,\"hazardDamagePerTurn\":14,\"hazardMap\":\"\",\"hazardMapAuthor\":\"\",\"royale\":{\"shrinkEveryNTurns\":25},\"squad\":{\"allowBodyCollisions\":false,\"sharedElimination\":false,\"sharedHealth\":false,\"sharedLength\":false}}},\"map\":\"standard\",\"timeout\":2000,\"source\":\"\"},\"turn\":7,\"board\":{\"height\":11,\"width\":11,\"snakes\":[{\"id\":\"e423aef6-6a4c-4853-80ea-769063173020\",\"name\":\"Frankies\",\"latency\":\"26\",\"health\":95,\"body\":[{\"x\":5,\"y\":4},{\"x\":6,\"y\":4},{\"x\":7,\"y\":4},{\"x\":8,\"y\":4}],\"head\":{\"x\":5,\"y\":4},\"length\":4,\"shout\":\"\",\"squad\":\"\",\"customizations\":{\"color\":\"#FFFF33\",\"head\":\"whale\",\"tail\":\"dragon\"}},{\"id\":\"ffb518c0-a8fe-4a58-8693-d7662bff9015\",\"name\":\"Fredeberg\",\"latency\":\"67\",\"health\":95,\"body\":[{\"x\":5,\"y\":6},{\"x\":4,\"y\":6},{\"x\":3,\"y\":6},{\"x\":2,\"y\":6}],\"head\":{\"x\":5,\"y\":6},\"length\":4,\"shout\":\"\",\"squad\":\"\",\"customizations\":{\"color\":\"#00FF00\",\"head\":\"alligator\",\"tail\":\"alligator\"}},{\"id\":\"a48cbdb2-6875-4059-ba7a-f86c6a34544a\",\"name\":\"Jimseloms\",\"latency\":\"4\",\"health\":95,\"body\":[{\"x\":6,\"y\":5},{\"x\":6,\"y\":6},{\"x\":6,\"y\":7},{\"x\":6,\"y\":8}],\"head\":{\"x\":6,\"y\":5},\"length\":4,\"shout\":\"\",\"squad\":\"\",\"customizations\":{\"color\":\"#670000\",\"head\":\"sneaky\",\"tail\":\"skinny-jeans\"}}],\"food\":[{\"x\":5,\"y\":5},{\"x\":1,\"y\":4}],\"hazards\":[]},\"you\":{\"id\":\"a48cbdb2-6875-4059-ba7a-f86c6a34544a\",\"name\":\"Jimseloms\",\"latency\":\"0\",\"health\":95,\"body\":[{\"x\":6,\"y\":5},{\"x\":6,\"y\":6},{\"x\":6,\"y\":7},{\"x\":6,\"y\":8}],\"head\":{\"x\":6,\"y\":5},\"length\":4,\"shout\":\"\",\"squad\":\"\",\"customizations\":{\"color\":\"#670000\",\"head\":\"sneaky\",\"tail\":\"skinny-jeans\"}}}")
+        direction = decideMove(request)
+        println("Move 2: " + direction)
+//        assertEquals(Direction.RIGHT, direction)
+    }
+
+    @Test
     fun testDecideMove() {
 
         val request = getMoveRequest()
@@ -245,5 +263,6 @@ internal class LogicKtTest {
         assertEquals(3, getDistance(Position(1,1), Position(3,3)).roundToInt())
 
         assertEquals(1.0, getDistance(Position(1,1), Position(1,2)))
+        assertEquals(2.0, getDistance(Position(1,9), Position(2,10)))
     }
 }

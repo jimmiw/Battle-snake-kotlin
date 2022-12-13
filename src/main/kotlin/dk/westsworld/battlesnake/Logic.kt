@@ -19,6 +19,7 @@ fun decideMove(request: MoveRequest): Direction {
     }
 
     println("time taken: " + time + "ms")
+    println("final MOVE is: " + direction)
 
     return direction
 }
@@ -130,8 +131,6 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
         bestDirection = safeMoves.randomOrNull() ?: Direction.DOWN
     }
 
-    println("final MOVE is: " + bestDirection)
-
     return bestDirection
 }
 
@@ -226,9 +225,9 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
                 // checking if the given snake is within too close of a distance of the new position
                 val distance = getDistance(snake.head, newPosition)
                 if (distance <= 2.0) {
-                    println("Move " + direction + " is not valid, as it is too close to an other snake")
-                    println("snake vs newPosition: " + snake.head + " & " + newPosition)
-                    println("distance: " + distance)
+                    println("UNSAFE: Move " + direction + " is not valid, as it is too close to an other snake")
+                    println("UNSAFE: snake vs newPosition: " + snake.head + " & " + newPosition)
+                    println("UNSAFE: distance is " + distance)
                     validMove = false
                 }
             }
@@ -301,12 +300,14 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
         100
     } else {
         // calculate the "best length" to the food
-        (getDistance(battleSnake.head, safeFoodPosition) * 3).toInt()
+        (getDistance(battleSnake.head, safeFoodPosition) * 1.5).toInt()
     }
+
+    println("max depth is: " + maxDepth)
+    println("current head position is: " + battleSnake.head)
 
     var nextPosition = getNextMoveTowardsPosition(battleSnake.head, safeFoodPosition, route, board, maxDepth)
     println("Route is: " + route)
-    println("current head position is: " + battleSnake.head)
     println("suggested new position is: " + nextPosition)
     var nextDirection = battleSnake.head.getDirection(nextPosition ?: Position(0,0))
     println("suggested new direction is: " + nextDirection)
@@ -341,7 +342,7 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
  * NOTE: using floodfill to calculate the next step :)
  */
 fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: Position, route: MutableList<Position>, board: Board, maxDepth: Int): Position? {
-    if (maxDepth < 1) {
+    if (maxDepth < 0) {
 //        println("quitting path because of max depth!")
         return null
     }
@@ -395,7 +396,7 @@ private fun isSoloMap(): Boolean {
 fun getDistance(position1: Position, position2: Position): Double {
     val xPos = (position2.x - position1.x)
     val yPos = (position2.y - position1.y)
-    return Math.sqrt(Math.pow(xPos.toDouble(), 2.0) + Math.pow(yPos.toDouble(), 2.0))
+    return Math.ceil(Math.sqrt(Math.pow(xPos.toDouble(), 2.0) + Math.pow(yPos.toDouble(), 2.0)))
 }
 
 /**
