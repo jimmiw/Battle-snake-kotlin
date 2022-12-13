@@ -133,7 +133,7 @@ internal class LogicKtTest {
     }
 
     @Test
-    fun testMoveRequestParsing() {
+    fun testMoveFindFoodParsing() {
         val serializer = Json {
             isLenient = true
             ignoreUnknownKeys = true

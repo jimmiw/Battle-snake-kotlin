@@ -226,9 +226,9 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
                 // checking if the given snake is within too close of a distance of the new position
                 val distance = getDistance(snake.head, newPosition)
                 if (distance <= 2.0) {
-//                    println("Move " + direction + " is not valid, as it is too close to an other snake")
-//                    println("snake vs newPosition: " + snake.head + " & " + newPosition)
-//                    println("distance: " + distance)
+                    println("Move " + direction + " is not valid, as it is too close to an other snake")
+                    println("snake vs newPosition: " + snake.head + " & " + newPosition)
+                    println("distance: " + distance)
                     validMove = false
                 }
             }
@@ -342,7 +342,7 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
  */
 fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: Position, route: MutableList<Position>, board: Board, maxDepth: Int): Position? {
     if (maxDepth < 1) {
-        println("quitting path because of max depth!")
+//        println("quitting path because of max depth!")
         return null
     }
 
@@ -354,7 +354,7 @@ fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: P
             route.first()
         }
     } else {
-        println("" + currentPosition + " adjacent " + currentPosition.adjacent())
+//        println("" + currentPosition + " adjacent " + currentPosition.adjacent())
         for (position in currentPosition.adjacent()) {
             if (isSafePosition(position, board)) {
                 if (!route.contains(position)) {
