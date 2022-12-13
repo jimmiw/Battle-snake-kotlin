@@ -93,8 +93,13 @@ fun main() {
             post("/move") {
                 val json = call.receiveText()
                 println(json)
+                val serializer = Json {
+                    isLenient = true
+                    ignoreUnknownKeys = true
+                }
+                val request = serializer.decodeFromString<MoveRequest>(json)
                 // This receives the post body as json text
-                val request = call.receive<MoveRequest>()
+//                val request = call.receive<MoveRequest>()
 
                 // We will respond with whatever Logic.kt tells us!
                 call.respond(

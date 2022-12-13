@@ -1,11 +1,12 @@
 package dk.westsworld.battlesnake
 
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonBuilder
+import kotlinx.serialization.json.JsonConfiguration
 import kotlin.math.roundToInt
 import kotlin.system.measureTimeMillis
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 internal class LogicKtTest {
     @Test
@@ -129,6 +130,19 @@ internal class LogicKtTest {
             board,
             snake
         )
+    }
+
+    @Test
+    fun testMoveRequestParsing() {
+        val json = "{\"game\":{\"id\":\"b0fe08d0-65ec-40aa-9026-b1927d5a9a50\",\"ruleset\":{\"name\":\"standard\",\"version\":\"v1.2.0\",\"settings\":{\"foodSpawnChance\":15,\"minimumFood\":1,\"hazardDamagePerTurn\":14,\"hazardMap\":\"\",\"hazardMapAuthor\":\"\",\"royale\":{\"shrinkEveryNTurns\":0},\"squad\":{\"allowBodyCollisions\":false,\"sharedElimination\":false,\"sharedHealth\":false,\"sharedLength\":false}}},\"map\":\"standard\",\"timeout\":500,\"source\":\"custom\"},\"turn\":3,\"board\":{\"height\":11,\"width\":11,\"snakes\":[{\"id\":\"gs_b3WT87DmdQ3JVd6hDmDbMq76\",\"name\":\"Frank The Tank\",\"latency\":\"29\",\"health\":99,\"body\":[{\"x\":6,\"y\":1},{\"x\":6,\"y\":0},{\"x\":5,\"y\":0},{\"x\":5,\"y\":1}],\"head\":{\"x\":6,\"y\":1},\"length\":4,\"shout\":\"\",\"squad\":\"\",\"customizations\":{\"color\":\"#ffff33\",\"head\":\"whale\",\"tail\":\"dragon\"}},{\"id\":\"gs_qMGSFmXJwXHfwxByVkbJwQkb\",\"name\":\"Stupid snake (Just getting started)\",\"latency\":\"21\",\"health\":99,\"body\":[{\"x\":5,\"y\":10},{\"x\":6,\"y\":10},{\"x\":6,\"y\":9},{\"x\":5,\"y\":9}],\"head\":{\"x\":5,\"y\":10},\"length\":4,\"shout\":\"\",\"squad\":\"\",\"customizations\":{\"color\":\"#00ff00\",\"head\":\"alligator\",\"tail\":\"alligator\"}},{\"id\":\"gs_FFwqdFHRwQh8Ycv9qkwYQvf6\",\"name\":\"Mister Sneaky Pants\",\"latency\":\"28\",\"health\":97,\"body\":[{\"x\":1,\"y\":8},{\"x\":1,\"y\":7},{\"x\":1,\"y\":6}],\"head\":{\"x\":1,\"y\":8},\"length\":3,\"shout\":\"\",\"squad\":\"\",\"customizations\":{\"color\":\"#670000\",\"head\":\"sneaky\",\"tail\":\"skinny-jeans\"}}],\"food\":[{\"x\":0,\"y\":4},{\"x\":5,\"y\":5}],\"hazards\":[]},\"you\":{\"id\":\"gs_FFwqdFHRwQh8Ycv9qkwYQvf6\",\"name\":\"Mister Sneaky Pants\",\"latency\":\"28\",\"health\":97,\"body\":[{\"x\":1,\"y\":8},{\"x\":1,\"y\":7},{\"x\":1,\"y\":6}],\"head\":{\"x\":1,\"y\":8},\"length\":3,\"shout\":\"\",\"squad\":\"\",\"customizations\":{\"color\":\"#670000\",\"head\":\"sneaky\",\"tail\":\"skinny-jeans\"}}}"
+
+        var serializer = Json {
+            isLenient = true
+            ignoreUnknownKeys = true
+        }
+
+        val request = serializer.decodeFromString<MoveRequest>(json)
+        assertNotNull(request)
     }
 
     @Test
