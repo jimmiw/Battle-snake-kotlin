@@ -238,7 +238,7 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
             if (snake.id != currentSnake.id && ! disregardSafety) {
                 // checking if the given snake is within too close of a distance of the new position
                 val distance = getDistance(snake.head, newPosition)
-                if (distance <= 1.2) {
+                if (distance <= 2.0) {
 //                    println("Move " + direction + " is not valid, as it is too close to an other snake")
 //                    println("snake vs newPosition: " + snake.head + " & " + newPosition)
 //                    println("distance: " + distance)
