@@ -343,7 +343,6 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
  */
 fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: Position, route: MutableList<Position>, board: Board, maxDepth: Int): Position? {
     if (maxDepth < 0) {
-//        println("quitting path because of max depth!")
         return null
     }
 
@@ -355,8 +354,14 @@ fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: P
             route.first()
         }
     } else {
-//        println("" + currentPosition + " adjacent " + currentPosition.adjacent())
-        for (position in currentPosition.adjacent()) {
+        // sorting the adjacent positions, so we might get a better path
+        val adjacentPositions = currentPosition.adjacent()
+//        println("not sorted: " + adjacentPositions)
+        var adjacentPositionsSorted = adjacentPositions.toMutableList()
+        adjacentPositionsSorted.sortBy { getDistance(it, destinationPosition) }
+//        println("sorted: " + adjacentPositionsSorted)
+
+        for (position in adjacentPositionsSorted) {
             if (isSafePosition(position, board)) {
                 if (!route.contains(position)) {
                     // adding the current position to our route towards the destination!
