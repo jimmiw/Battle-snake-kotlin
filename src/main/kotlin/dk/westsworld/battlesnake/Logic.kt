@@ -112,7 +112,8 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     }
 
     // We need to prioritize the food, so, the found food direction is calculated "again"
-    if (foodDirection != null) {
+    // ZOMG remember to not take a food move, if it's NOT safe... :D
+    if (foodDirection != null && safeMoves.contains(foodDirection)) {
         val position = battleSnake.head + foodDirection
         val foodSpaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
 
