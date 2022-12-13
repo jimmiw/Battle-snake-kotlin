@@ -1,9 +1,10 @@
 package dk.westsworld.battlesnake
 
+import kotlin.jvm.internal.Intrinsics.Kotlin
 import kotlin.system.measureTimeMillis
 
 var game: Game? = null
-//= Game("", Ruleset("", "", RulesetSettings(1,1,1,null, null)), null, 1, null)
+var minimumDistanceToSnakeHeads = 2.0
 
 // This is the heart of your snake
 // It defines what to do on your next move
@@ -72,7 +73,7 @@ fun isSafePosition(position: Position, board: Board): Boolean {
 
 fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     // we are trying to hunt for food...
-    val foodDirection = if (shouldFindFood(battleSnake)) {
+    val foodDirection = if (shouldFindFood(battleSnake, board)) {
         goTowardsFood(battleSnake, board)
     } else {
         null
@@ -80,32 +81,29 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
 
     var safeMoves = getSafeMoves(battleSnake, board, shouldMovesBeSafe())
 
-//    println("food direction: " + foodDirection)
-//    println("safeMoves: " + safeMoves)
-
     // finding the optimal move, which is the one with "most space left" after the move has been done
     var bestDirection: Direction? = null
     var bestSpaceLeft = 0
-
+    // finds the best direction
     for (move in safeMoves) {
-//        println("checking safe move " + move)
         // calculating the battle snake's head position, after the move
         val position = battleSnake.head + move
         // calculating how much space is left, if that move is taken
         val spaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
 
-//        println("space left is " + spaceLeft)
-
         if (spaceLeft > bestSpaceLeft) {
             bestSpaceLeft = spaceLeft
             bestDirection = move
-//            println("is new bestDirection: " + bestDirection + " with " + spaceLeft + " space")
         }
     }
+
+    println("food direction " + foodDirection)
+    println("best direction " + bestDirection)
 
     // We need to prioritize the food, so, the found food direction is calculated "again"
     // ZOMG remember to not take a food move, if it's NOT safe... :D
     if (foodDirection != null && safeMoves.contains(foodDirection)) {
+        println("entering ZOMG section")
         val position = battleSnake.head + foodDirection
         val foodSpaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
 
@@ -114,15 +112,18 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
             bestDirection = foodDirection
             println("solo map, food direction is always best: " + foodDirection)
         } else {
-            // if the food move, is the move with the move space left, take it
-            if (foodSpaceLeft >= bestSpaceLeft) {
-                bestDirection = foodDirection
-                println("food is new bestDirection: " + foodDirection + " with " + foodSpaceLeft + " space - CHOSEN")
-            } else {
-                // checking if the food move, can still be used... is there enough room for the snake if it's +1 length?
-                if (foodSpaceLeft + 1 > battleSnake.length) {
+            // only take a food move, if it's safe :)
+            if (getDistanceToClosestSnake(position, battleSnake, board.snakes) > minimumDistanceToSnakeHeads) {
+                // if the food move, is the move with the move space left, take it
+                if (foodSpaceLeft >= bestSpaceLeft) {
                     bestDirection = foodDirection
-                    println("food is big enough: " + foodDirection + " with " + foodSpaceLeft + " space - has enough space for the snake, let's try it out!")
+                    println("food is new bestDirection: " + foodDirection + " with " + foodSpaceLeft + " space - CHOSEN")
+                } else {
+                    // checking if the food move, can still be used... is there enough room for the snake if it's +1 length?
+                    if (foodSpaceLeft + 1 > battleSnake.length) {
+                        bestDirection = foodDirection
+                        println("food is big enough: " + foodDirection + " with " + foodSpaceLeft + " space - has enough space for the snake, let's try it out!")
+                    }
                 }
             }
         }
@@ -140,12 +141,45 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
 }
 
 /**
+ * Finds the closest distance to the other snakes
+ */
+fun getDistanceToClosestSnake(position: Position, snake: BattleSnake, snakes: List<BattleSnake>): Double {
+    var closestDistance = 100000.0
+
+    // avoid all snakes at all costs!
+    for (otherSnake in snakes) {
+        if (otherSnake.id != snake.id) {
+            val distance = getDistance(otherSnake.head, position)
+            closestDistance = kotlin.math.min(distance, closestDistance)
+        }
+    }
+
+    return closestDistance
+}
+
+/**
  * Tests if the snake should go for food!
  */
-fun shouldFindFood(battleSnake: BattleSnake): Boolean {
-    if (isSoloMap()) {
+fun shouldFindFood(battleSnake: BattleSnake, board: Board): Boolean {
+    if (isSoloMap() ) {
         return true
-    } else if (battleSnake.length > 50) {
+    }
+
+    // we want to be the largest snake on the board
+    var largestSnake = battleSnake.length
+    for (snake in board.snakes) {
+        // skip self!
+        if (snake.id != battleSnake.id) {
+            if (snake.length > largestSnake) {
+                largestSnake = snake.length
+            }
+        }
+    }
+
+    // never be the smallest!
+    if (battleSnake.length < largestSnake) {
+        return true
+    } else if (battleSnake.health > 30) {
         return false
     }
 
@@ -230,29 +264,33 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
     }
 
     // avoid all snakes at all costs!
-    for (snake in board.snakes) {
+//    for (snake in board.snakes) {
         safeMoves = safeMoves.filter { direction ->
             // Find the next intended position
             val newPosition = head + direction
 
             // checking if the new position is on an opposing snake in the game
-            var validMove = !isCollidingWithSnake(newPosition, snake, board)
+            var validMove = true //!isCollidingWithSnake(newPosition, snake, board)
 
-            // only check distance on other snakes (AND disreguardSafety is false)
-            if (snake.id != currentSnake.id && ! disregardSafety) {
-                // checking if the given snake is within too close of a distance of the new position
-                val distance = getDistance(snake.head, newPosition)
-                if (distance <= 2.0) {
-                    println("UNSAFE: Move " + direction + " is not valid, as it is too close to an other snake")
-                    println("UNSAFE: snake vs newPosition: " + snake.head + " & " + newPosition)
-                    println("UNSAFE: distance is " + distance)
-                    validMove = false
-                }
+            if (getDistanceToClosestSnake(newPosition, currentSnake, board.snakes) < minimumDistanceToSnakeHeads) {
+                validMove = false
             }
+
+//            // only check distance on other snakes (AND disreguardSafety is false)
+//            if (snake.id != currentSnake.id && ! disregardSafety) {
+//                // checking if the given snake is within too close of a distance of the new position
+//                val distance = getDistance(snake.head, newPosition)
+//                if (distance <= minimumDistanceToSnakeHeads) {
+//                    println("UNSAFE: Move " + direction + " is not valid, as it is too close to an other snake")
+//                    println("UNSAFE: snake vs newPosition: " + snake.head + " & " + newPosition)
+//                    println("UNSAFE: distance is " + distance)
+//                    validMove = false
+//                }
+//            }
 
             validMove
         }
-    }
+//    }
 
     return safeMoves
 }
@@ -467,22 +505,12 @@ fun isHazard(position: Position, board: Board): Boolean {
  */
 fun isCollidingWithSnake(position: Position, snake: BattleSnake, board: Board): Boolean {
     var snakeBody = snake.body
-//    println("Check colliding with " + snake.name)
+
     // only remove the tail, if the body is more than one element
     if (snake.length > 1 && ! hasImmediateFoodMove(snake, board)) {
         snakeBody = snakeBody.subList(0, snake.length - 1 )
-//        println("subtracting snake tail!")
     }
 
-    // Step 0: Don't let your Battlesnake move back on its own neck
-    for (bodyPosition in snakeBody) {
-        // if the given position is on a part of the given battleSnakes body, we are hitting the body
-        if (bodyPosition == position) {
-//            println("New position is hitting body at " + position + " with body pos: " + bodyPosition)
-            return true
-        }
-    }
-
-    return false
+    return snakeBody.contains(position)
 }
 
