@@ -283,7 +283,7 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
 
     // using floodfill to find a path to the food
     var route = mutableListOf<Position>();
-    var nextPosition = getNextMoveTowardsPosition(battleSnake.head, safeFoodPosition, route, board);
+    var nextPosition = getNextMoveTowardsPosition(battleSnake.head, safeFoodPosition, route, board, 0);
     println("Route is: " + route)
     println("current head position is: " + battleSnake.head)
     println("suggested new position is: " + nextPosition)
@@ -319,7 +319,12 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
  * Suggests the next direction to walk in, to get to the given position.
  * NOTE: using floodfill to calculate the next step :)
  */
-fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: Position, route: MutableList<Position>, board: Board): Position? {
+fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: Position, route: MutableList<Position>, board: Board, depth: Int): Position? {
+    if (depth > 70) {
+        println("stopping because of max depth!")
+        return route.first()
+    }
+
     if (currentPosition == destinationPosition) {
         // if the first possible destination is the food, return it!
         return if (route.isEmpty()) {
@@ -328,13 +333,14 @@ fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: P
             route.first()
         }
     } else {
+        println("" + currentPosition + " adjacent " + currentPosition.adjacent())
         for (position in currentPosition.adjacent()) {
             if (isSafePosition(position, board)) {
                 if (!route.contains(position)) {
                     // adding the current position to our route towards the destination!
                     route.add(position)
 
-                    val nextMove = getNextMoveTowardsPosition(position, destinationPosition, route, board)
+                    val nextMove = getNextMoveTowardsPosition(position, destinationPosition, route, board, depth + 1)
 
                     if (nextMove == null) {
                         // no route found, remove position, return null

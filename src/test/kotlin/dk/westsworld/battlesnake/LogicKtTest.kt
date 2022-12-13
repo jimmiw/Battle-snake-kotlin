@@ -1,6 +1,7 @@
 package dk.westsworld.battlesnake
 
 import kotlin.math.roundToInt
+import kotlin.system.measureTimeMillis
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -26,7 +27,7 @@ internal class LogicKtTest {
             SnakeCustomization("","","")
         )
 
-        val board = Board(3, 3, foodList, listOf(), listOf(snake))
+        val board = Board(11, 11, foodList, listOf(), listOf(snake))
         val game = Game(
             "game id 1",
             Ruleset(
@@ -144,16 +145,21 @@ internal class LogicKtTest {
     @Test
     fun testFindFood() {
         var request = getSoloFoodMoveRequest(
-            Position(1,0),
-            listOf(Position(1,0), Position(0,0)),
+            Position(9,5),
+            listOf(Position(9,5), Position(9,5)),
             listOf()
         );
 
         var route = mutableListOf<Position>()
-        var nextPosition = getNextMoveTowardsPosition(request.you.head, Position(0,0), route, request.board)
+        var nextPosition: Position? = null
+        val timeInMillis = measureTimeMillis {
+            nextPosition = getNextMoveTowardsPosition(request.you.head, Position(10,5), route, request.board, 0)
+        }
+        println("route calc time: " + timeInMillis + "ms")
+        println("Route length: " + route.size)
         println("Route is: " + route)
         println("suggested new position is: " + nextPosition)
-        var nextDirection = request.you.head.getDirection(nextPosition ?: Position(0,0))
+        var nextDirection = request.you.head.getDirection(nextPosition ?: Position(8,5))
         println("suggested new direction is: " + nextDirection)
     }
 
