@@ -1,5 +1,7 @@
 package dk.westsworld.battlesnake
 
+import kotlin.system.measureTimeMillis
+
 var game: Game? = null
 //= Game("", Ruleset("", "", RulesetSettings(1,1,1,null, null)), null, 1, null)
 
@@ -25,7 +27,14 @@ fun decideMove(request: MoveRequest): Direction {
 //    return bestMove
 
 
-    return getMoveDirection(request.you, request.board)
+    var direction = Direction.UP
+    var time = measureTimeMillis {
+        direction = getMoveDirection(request.you, request.board)
+    }
+
+    println("time taken: " + time + "ms")
+
+    return direction
 }
 
 /**
@@ -79,8 +88,8 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     val foodDirection = goTowardsFood(battleSnake, board)
     var safeMoves = getSafeMoves(battleSnake, board, shouldMovesBeSafe())
 
-    println("food direction: " + foodDirection)
-    println("safeMoves: " + safeMoves)
+//    println("food direction: " + foodDirection)
+//    println("safeMoves: " + safeMoves)
 
     // finding the optimal move, which is the one with "most space left" after the move has been done
     var bestDirection: Direction? = null
@@ -339,7 +348,7 @@ fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: P
     val maxDepth = if (isSoloMap()) {
         100
     } else {
-        20
+        10
     }
 
     if (depth > maxDepth) {
