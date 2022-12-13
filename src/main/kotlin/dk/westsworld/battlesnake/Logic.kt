@@ -472,6 +472,10 @@ fun hasImmediateFoodMove(battleSnake: BattleSnake, board: Board): Boolean {
  * @return Boolean
  */
 fun isOutOfBounds(position: Position, board: Board): Boolean {
+    if (game?.map == "arcade_maze") {
+        return false
+    }
+
     if (position.x < 0 || position.y < 0) {
         return true
     } else if (position.x >= board.width || position.y >= board.height) {
