@@ -91,6 +91,8 @@ fun main() {
 
             // The most important part: the move request
             post("/move") {
+                val json = call.receiveText()
+                println(json)
                 // This receives the post body as json text
                 val request = call.receive<MoveRequest>()
 

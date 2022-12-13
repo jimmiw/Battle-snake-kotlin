@@ -9,7 +9,7 @@ var game: Game? = null
 // It defines what to do on your next move
 // You get the current game state passed as a parameter, you only have to return a direction to move into
 fun decideMove(request: MoveRequest): Direction {
-    println(request)
+//    println(request)
 
     game = request.game
 //
