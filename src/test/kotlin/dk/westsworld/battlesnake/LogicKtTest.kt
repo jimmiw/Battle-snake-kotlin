@@ -153,7 +153,7 @@ internal class LogicKtTest {
         var route = mutableListOf<Position>()
         var nextPosition: Position? = null
         val timeInMillis = measureTimeMillis {
-            nextPosition = getNextMoveTowardsPosition(request.you.head, Position(10,5), route, request.board, 0)
+            nextPosition = getNextMoveTowardsPosition(request.you.head, Position(10,6), route, request.board, 0)
         }
         println("route calc time: " + timeInMillis + "ms")
         println("Route length: " + route.size)

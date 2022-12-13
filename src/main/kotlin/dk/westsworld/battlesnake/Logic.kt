@@ -283,7 +283,7 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
 
     // using floodfill to find a path to the food
     var route = mutableListOf<Position>();
-    var nextPosition = getNextMoveTowardsPosition(battleSnake.head, safeFoodPosition, route, board, 0);
+    var nextPosition = getNextMoveTowardsPosition(battleSnake.head, safeFoodPosition, route, board, 0)
     println("Route is: " + route)
     println("current head position is: " + battleSnake.head)
     println("suggested new position is: " + nextPosition)
@@ -320,9 +320,16 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
  * NOTE: using floodfill to calculate the next step :)
  */
 fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: Position, route: MutableList<Position>, board: Board, depth: Int): Position? {
-    if (depth > 20) {
-        println("stopping because of max depth!")
-        return route.first()
+    // when solo mapping, allow 100 moves as "ok" :)
+    val maxDepth = if (isSoloMap()) {
+        100
+    } else {
+        10
+    }
+
+    if (depth > maxDepth) {
+        println("quitting path because of max depth!")
+        return null
     }
 
     if (currentPosition == destinationPosition) {
