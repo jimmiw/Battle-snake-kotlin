@@ -58,14 +58,14 @@ fun isSafePosition(position: Position, board: Board): Boolean {
     if (isOutOfBounds(position, board)) {
         return false
     }
+
     if (isHazard(position, board)) {
         return false
     }
 
-    for (snake in board.snakes) {
-        if (isCollidingWithSnake(position, snake, board)) {
-            return false
-        }
+    // checking if we are colliding with any snake on the board
+    if (isCollidingWithASnake(position, board)) {
+        return false
     }
 
     return true
@@ -129,12 +129,19 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
         }
     }
 
+    // check if we can kill a smaller snake in "the next move"
+    val killMove = findPossibleHeadToHeadKillDirection(battleSnake, board)
+    // if we can kill a snake, go for it
+    if (killMove != null) {
+        return killMove
+    }
+
     // direction can be null, if there are no safe moves, where we have looked ahead for possible moves from other snakes
     if (bestDirection == null) {
         println("bestDirection was null, finding a less safe move with no lookahead")
         // find a safe move, but don't lookahead to see a possible dangerous situation
         safeMoves = getSafeMoves(battleSnake, board, false) // shouldMovesBeSafe() => false?
-        bestDirection = safeMoves.randomOrNull() ?: Direction.DOWN
+        bestDirection = safeMoves.randomOrNull() ?: Direction.DOWN // TODO: handle NEVER eating our neck. Use isNeckPosition()
     }
 
     return bestDirection
@@ -227,18 +234,36 @@ fun findPossibleHeadToHeadKillDirection(currentSnake: BattleSnake, board: Board)
 }
 
 /**
+ * Fetches the given snake's neck position
+ * @param currentSnake the snake we are checking
+ * @return the given snake's neck position
+ */
+fun getNeckPosition(currentSnake: BattleSnake): Position {
+    return currentSnake.body[1]
+}
+
+/**
+ * Checks if the given position, is the position of the given snakes neck.
+ * @param snake the snake to check
+ * @param position the position to check
+ * @return true if the position is the snake's neck, else false
+ */
+fun isNeckPosition(snake: BattleSnake, position: Position): Boolean {
+    return getNeckPosition(snake) == position
+}
+
+/**
  * finds the moves that are safe to do.
  * Should this be cached?
  */
 fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boolean): List<Direction> {
     val head = currentSnake.head
-    val neck = currentSnake.body[1]
 
     // do not hit our own neck!
     var safeMoves = enumValues<Direction>().filter { direction ->
         val newPosition = head + direction
 
-        newPosition != neck
+        ! isNeckPosition(currentSnake, newPosition)
     }
 
     // Finds moves to do, that are still on the map :)
@@ -499,6 +524,22 @@ fun isHazard(position: Position, board: Board): Boolean {
     }
 
     return false
+}
+
+/**
+ * Checks if the given position is colliding with a snake (body/head/tail) on the board
+ * @param position the position to check.
+ * @param board the current game board.
+ * @return Boolean
+ */
+fun isCollidingWithASnake(position: Position, board: Board): Boolean {
+    for (snake in board.snakes) {
+        if (isCollidingWithSnake(position, snake, board)) {
+            return true
+        }
+    }
+
+    return true
 }
 
 /**
