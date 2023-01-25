@@ -113,7 +113,9 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
             println("solo map, food direction is always best: " + foodDirection)
         } else {
             // only take a food move, if it's safe :)
-            if (getDistanceToClosestSnake(position, battleSnake, board.snakes) > minimumDistanceToSnakeHeads) {
+            val distance = getDistanceToClosestSnake(position, battleSnake, board.snakes)
+            println("distance to closest snake is " + distance + ", should be more than " + minimumDistanceToSnakeHeads)
+            if (distance > minimumDistanceToSnakeHeads) {
                 // if the food move, is the move with the move space left, take it
                 if (foodSpaceLeft >= bestSpaceLeft) {
                     bestDirection = foodDirection
@@ -133,6 +135,7 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     val killMove = findPossibleHeadToHeadKillDirection(battleSnake, board)
     // if we can kill a snake, go for it
     if (killMove != null) {
+        println("killMove available! " + killMove)
         return killMove
     }
 
