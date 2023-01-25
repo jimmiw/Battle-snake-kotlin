@@ -352,7 +352,7 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
 
 
     // using floodfill to find a path to the food
-    var route = mutableListOf<Position>();
+    var route = mutableListOf<Position>()
     println("safe food position is: " + safeFoodPosition)
 
     // when solo mapping, allow 100 moves as "ok" :)
