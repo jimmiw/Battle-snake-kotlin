@@ -265,7 +265,7 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
 
         ! isNeckPosition(currentSnake, newPosition)
     }
-
+    println("safeMoves0: " + safeMoves);
     // Finds moves to do, that are still on the map :)
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
@@ -274,7 +274,7 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
         // testing if the new position is out of bounds, of the current board
         ! isOutOfBounds(newPosition, board)
     }
-
+    println("safeMoves1: " + safeMoves);
     // finds the next move, that is NOT a hazard (wall etc.)
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
@@ -282,7 +282,7 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
 
         ! isHazard(newPosition, board)
     }
-
+    println("safeMoves2: " + safeMoves);
     // making sure we are not hitting a snake on an existing position
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
@@ -290,9 +290,9 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
 
         ! isCollidingWithASnake(newPosition, board)
     }
-
+    println("safeMoves3: " + safeMoves);
     if (safeMoves.isEmpty()) {
-//        println("no safe moves left, before looking at other snakes!")
+        println("no safe moves left, before disregardSafety checks")
         return listOf<Direction>()
     }
 
