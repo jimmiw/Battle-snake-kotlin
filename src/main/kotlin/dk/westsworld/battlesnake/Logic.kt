@@ -197,8 +197,8 @@ fun shouldFindFood(battleSnake: BattleSnake, board: Board): Boolean {
  * Tries to find a killing head-to-head direction
  */
 fun findPossibleHeadToHeadKillDirection(currentSnake: BattleSnake, board: Board): Direction? {
-    // first finding all the safe moves
-    var safeMoves = getSafeMoves(currentSnake, board, shouldMovesBeSafe())
+    // first finding all the safe moves, disregarding safety towards other snakes!
+    var safeMoves = getSafeMoves(currentSnake, board, true)
 
     for (snake in board.snakes) {
         // handle head-to-head collisions
@@ -206,7 +206,7 @@ fun findPossibleHeadToHeadKillDirection(currentSnake: BattleSnake, board: Board)
             // Find the next intended position
             val newPosition = currentSnake.head + direction
 
-            // if our snake is smaller than a snake close to us, do not go TOO close to it's head as it will eat us!
+            // NOTE: if our snake is smaller than a snake close to us, do not go TOO close to it's head as it will eat us!
             var valid = true
             if (snake.head.adjacent().contains(newPosition)) {
                 // if a snake is close, we might lose head to head
@@ -283,13 +283,21 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
         ! isHazard(newPosition, board)
     }
 
+    // making sure we are not hitting a snake on an existing position
+    safeMoves = safeMoves.filter { direction ->
+        // Find the next intended position
+        val newPosition = head + direction
+
+        ! isCollidingWithASnake(newPosition, board)
+    }
+
     if (safeMoves.isEmpty()) {
 //        println("no safe moves left, before looking at other snakes!")
         return listOf<Direction>()
     }
 
-    // avoid all snakes at all costs!
-//    for (snake in board.snakes) {
+    // if we are not disregarding safety, we should check the distance to the other snakes' heads
+    if (!disregardSafety) {
         safeMoves = safeMoves.filter { direction ->
             // Find the next intended position
             val newPosition = head + direction
@@ -315,7 +323,7 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
 
             validMove
         }
-//    }
+    }
 
     return safeMoves
 }
