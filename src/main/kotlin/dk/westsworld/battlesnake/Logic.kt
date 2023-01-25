@@ -405,7 +405,7 @@ fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: P
     if (maxDepth < 0) {
         return null
     }
-    println("getNextMoveTowardsPosition()" + currentPosition)
+    println("getNextMoveTowardsPosition() " + currentPosition + " :: " + destinationPosition)
     if (currentPosition == destinationPosition) {
         // if the first possible destination is the desired destination, return it!
         return if (route.isEmpty()) {
