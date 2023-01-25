@@ -547,7 +547,7 @@ fun isCollidingWithASnake(position: Position, board: Board): Boolean {
         }
     }
 
-    return true
+    return false
 }
 
 /**
