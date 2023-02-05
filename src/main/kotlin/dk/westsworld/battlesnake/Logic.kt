@@ -174,6 +174,9 @@ fun shouldFindFood(battleSnake: BattleSnake, board: Board): Boolean {
         return true
     }
 
+    // always go for food!
+    return true
+
     // we want to be the largest snake on the board
     var largestSnake = battleSnake.length
     for (snake in board.snakes) {
