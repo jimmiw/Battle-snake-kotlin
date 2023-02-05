@@ -1,10 +1,9 @@
 package dk.westsworld.battlesnake
 
-import kotlin.jvm.internal.Intrinsics.Kotlin
 import kotlin.system.measureTimeMillis
 
 var game: Game? = null
-var minimumDistanceToSnakeHeads = 2.0
+val minimumDistanceToSnakeHeads = 2.0
 
 // This is the heart of your snake
 // It defines what to do on your next move
@@ -15,7 +14,7 @@ fun decideMove(request: MoveRequest): Direction {
     game = request.game
 
     var direction = Direction.UP
-    var time = measureTimeMillis {
+    val time = measureTimeMillis {
         direction = getMoveDirection(request.you, request.board)
     }
 
@@ -278,12 +277,27 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
         ! isOutOfBounds(newPosition, board)
     }
     println("safeMoves1: " + safeMoves);
+
+    // finding damage per turn (if any), converting from nullable int, to regular int
+    val damagePerTurn: Int = if (game?.ruleset?.settings?.hazardDamagePerTurn != null) {
+        game?.ruleset?.settings?.hazardDamagePerTurn!!
+    } else {
+        0
+    }
+
     // finds the next move, that is NOT a hazard (wall etc.)
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
         val newPosition = head + direction
 
-        ! isHazard(newPosition, board)
+        var isHazardMove = isHazard(newPosition, board)
+
+        // if we have a hazard move, check if we can survive it!
+        if (isHazardMove && currentSnake.health > damagePerTurn) {
+            isHazardMove = false
+        }
+
+        isHazardMove
     }
     println("safeMoves2: " + safeMoves);
     // making sure we are not hitting a snake on an existing position
@@ -311,18 +325,6 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
             if (getDistanceToClosestSnake(newPosition, currentSnake, board.snakes) < minimumDistanceToSnakeHeads) {
                 validMove = false
             }
-
-//            // only check distance on other snakes (AND disreguardSafety is false)
-//            if (snake.id != currentSnake.id && ! disregardSafety) {
-//                // checking if the given snake is within too close of a distance of the new position
-//                val distance = getDistance(snake.head, newPosition)
-//                if (distance <= minimumDistanceToSnakeHeads) {
-//                    println("UNSAFE: Move " + direction + " is not valid, as it is too close to an other snake")
-//                    println("UNSAFE: snake vs newPosition: " + snake.head + " & " + newPosition)
-//                    println("UNSAFE: distance is " + distance)
-//                    validMove = false
-//                }
-//            }
 
             validMove
         }
@@ -363,7 +365,9 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
         100
     } else {
         // calculate the "best length" to the food
-        (getDistance(battleSnake.head, safeFoodPosition) * 1.5).toInt()
+        val distance = (getDistance(battleSnake.head, safeFoodPosition) * 1.5).toInt()
+        // adding a maximum distance, just to help out the processing
+        if (distance > 20 ) 20 else distance
     }
 
     println("max depth is: " + maxDepth)
@@ -408,7 +412,8 @@ fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: P
     if (maxDepth < 0) {
         return null
     }
-    println("getNextMoveTowardsPosition() " + currentPosition + " :: " + destinationPosition)
+    println("getNextMoveTowardsPosition() " + currentPosition + " -> " + destinationPosition)
+    println("getNextMoveTowardsPosition() route: " + route)
     if (currentPosition == destinationPosition) {
         // if the first possible destination is the desired destination, return it!
         return if (route.isEmpty()) {
