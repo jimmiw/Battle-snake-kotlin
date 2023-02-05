@@ -89,8 +89,10 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
         val position = battleSnake.head + move
         // calculating how much space is left, if that move is taken
         val spaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
+        val distanceToSnakeOnBestMove = getDistanceToClosestSnake(position, battleSnake, board.snakes)
 
-        if (spaceLeft > bestSpaceLeft) {
+        // checking the amount of space left on the new move AND the distance to the nearest snake.
+        if (spaceLeft > bestSpaceLeft && distanceToSnakeOnBestMove > minimumDistanceToSnakeHeads) {
             bestSpaceLeft = spaceLeft
             bestDirection = move
         }
