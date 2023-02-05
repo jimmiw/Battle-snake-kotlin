@@ -267,7 +267,7 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
 
         ! isNeckPosition(currentSnake, newPosition)
     }
-    println("safeMoves0: " + safeMoves);
+    println("safeMoves0 !neck: " + safeMoves);
     // Finds moves to do, that are still on the map :)
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
@@ -276,30 +276,33 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
         // testing if the new position is out of bounds, of the current board
         ! isOutOfBounds(newPosition, board)
     }
-    println("safeMoves1: " + safeMoves);
+    println("safeMoves1 !oob: " + safeMoves);
 
-    // finding damage per turn (if any), converting from nullable int, to regular int
-    val damagePerTurn: Int = if (game?.ruleset?.settings?.hazardDamagePerTurn != null) {
-        game?.ruleset?.settings?.hazardDamagePerTurn!!
-    } else {
-        0
-    }
-
-    // finds the next move, that is NOT a hazard (wall etc.)
-    safeMoves = safeMoves.filter { direction ->
-        // Find the next intended position
-        val newPosition = head + direction
-
-        var isHazardMove = isHazard(newPosition, board)
-
-        // if we have a hazard move, check if we can survive it!
-        if (isHazardMove && currentSnake.health > damagePerTurn) {
-            isHazardMove = false
+    // only check for hazards, if we have a map with hazards :)
+    if (game?.map == "royale") {
+        // finding damage per turn (if any), converting from nullable int, to regular int
+        val damagePerTurn: Int = if (game?.ruleset?.settings?.hazardDamagePerTurn != null) {
+            game?.ruleset?.settings?.hazardDamagePerTurn!!
+        } else {
+            0
         }
 
-        isHazardMove
+        // finds the next move, that is NOT a hazard (wall etc.)
+        safeMoves = safeMoves.filter { direction ->
+            // Find the next intended position
+            val newPosition = head + direction
+
+            var isHazardMove = isHazard(newPosition, board)
+
+            // if we have a hazard move, check if we can survive it!
+            if (isHazardMove && currentSnake.health > damagePerTurn) {
+                isHazardMove = false
+            }
+
+            isHazardMove
+        }
+        println("safeMoves2 !hazards: " + safeMoves);
     }
-    println("safeMoves2: " + safeMoves);
     // making sure we are not hitting a snake on an existing position
     safeMoves = safeMoves.filter { direction ->
         // Find the next intended position
@@ -307,7 +310,7 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
 
         ! isCollidingWithASnake(newPosition, board)
     }
-    println("safeMoves3: " + safeMoves);
+    println("safeMoves3 !snakes: " + safeMoves);
     if (safeMoves.isEmpty()) {
         println("no safe moves left, before disregardSafety checks")
         return listOf<Direction>()
