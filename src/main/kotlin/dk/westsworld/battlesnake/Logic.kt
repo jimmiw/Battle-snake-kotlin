@@ -286,8 +286,8 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
     }
     println("safeMoves1 !oob: " + safeMoves);
 
-    // only check for hazards, if we have a map with hazards :)
-    if (game?.map == "royale") {
+    // only check for hazards, if we have a map with hazards and there are any hazards :)
+    if (game?.map == "royale" && !board.hazards.isEmpty()) {
         // finding damage per turn (if any), converting from nullable int, to regular int
         val damagePerTurn: Int = if (game?.ruleset?.settings?.hazardDamagePerTurn != null) {
             game?.ruleset?.settings?.hazardDamagePerTurn!!
