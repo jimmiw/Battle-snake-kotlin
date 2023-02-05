@@ -99,35 +99,40 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     println("food direction " + foodDirection)
     println("best direction " + bestDirection)
 
+    // if it's a solo map, we should ALWAYS go for the food
+    if (isSoloMap()) {
+        if (foodDirection != null) {
+            println("solo map, food direction is always best: " + foodDirection)
+            return foodDirection
+        }
+
+        // no food? go for the best direction (with a fallback to direction down)
+        return bestDirection ?: (safeMoves.randomOrNull() ?: Direction.DOWN)
+    }
+
     // We need to prioritize the food, so, the found food direction is calculated "again"
     // ZOMG remember to not take a food move, if it's NOT safe... :D
     if (foodDirection != null && safeMoves.contains(foodDirection)) {
-        println("entering ZOMG section")
-        val position = battleSnake.head + foodDirection
-        val foodSpaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
+        println("entering ZOMG foodsection")
+        val suggestedFoodPosition = battleSnake.head + foodDirection
+        val foodSpaceLeft = getSpaceLeft(suggestedFoodPosition, board, mutableListOf<Position>())
 
-        // if it's a solo map, we should ALWAYS go for the food
-        if (isSoloMap()) {
-            bestDirection = foodDirection
-            println("solo map, food direction is always best: " + foodDirection)
-        } else {
-            // only take a food move, if it's safe :)
-            val distance = getDistanceToClosestSnake(position, battleSnake, board.snakes)
-            println("distance to closest snake is " + distance + ", should be more than " + minimumDistanceToSnakeHeads)
-            if (distance > minimumDistanceToSnakeHeads) {
-                // if the food move, is the move with the move space left, take it
-                if (foodSpaceLeft >= bestSpaceLeft) {
+        // only take a food move, if it's safe :)
+        val distanceToFood = getDistanceToClosestSnake(suggestedFoodPosition, battleSnake, board.snakes)
+        println("distance to closest snake is " + distanceToFood + ", should be more than " + minimumDistanceToSnakeHeads)
+//        if (distanceToFood > minimumDistanceToSnakeHeads) {
+            // if the food move, is the move with the most space left, take it
+            if (foodSpaceLeft >= bestSpaceLeft) {
+                bestDirection = foodDirection
+                println("food is new bestDirection: " + foodDirection + " with " + foodSpaceLeft + " space - CHOSEN")
+            } else {
+                // checking if the food move, can still be used... is there enough room for the snake if it's +1 length?
+                if (foodSpaceLeft + 1 > battleSnake.length) {
                     bestDirection = foodDirection
-                    println("food is new bestDirection: " + foodDirection + " with " + foodSpaceLeft + " space - CHOSEN")
-                } else {
-                    // checking if the food move, can still be used... is there enough room for the snake if it's +1 length?
-                    if (foodSpaceLeft + 1 > battleSnake.length) {
-                        bestDirection = foodDirection
-                        println("food is big enough: " + foodDirection + " with " + foodSpaceLeft + " space - has enough space for the snake, let's try it out!")
-                    }
+                    println("food is big enough: " + foodDirection + " with " + foodSpaceLeft + " space - has enough space for the snake, let's try it out!")
                 }
             }
-        }
+//        }
     }
 
     // check if we can kill a smaller snake in "the next move"
@@ -352,8 +357,11 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
         val distance = getDistance(battleSnake.head, foodPosition)
 
         if (distance < distanceToFood) {
-            distanceToFood = distance
-            safeFoodPosition = foodPosition
+            // only consider food position, if we are far enough away from a snake head
+            if (getDistanceToClosestSnake(foodPosition, battleSnake, board.snakes) > minimumDistanceToSnakeHeads) {
+                distanceToFood = distance
+                safeFoodPosition = foodPosition
+            }
         }
     }
 
