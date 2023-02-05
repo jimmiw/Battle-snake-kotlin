@@ -213,34 +213,41 @@ fun findPossibleHeadToHeadKillDirection(currentSnake: BattleSnake, board: Board)
     var safeMoves = getSafeMoves(currentSnake, board, true)
 
     for (snake in board.snakes) {
-        // handle head-to-head collisions
-        safeMoves = safeMoves.filter { direction ->
-            // Find the next intended position
-            val newPosition = currentSnake.head + direction
+        // are we checking against our own snake?
+        if (snake.id != currentSnake.id) {
+            println("kill check on snake: " + snake.name)
+            // handle head-to-head collisions
+            safeMoves = safeMoves.filter { direction ->
+                // Find the next intended position
+                val newPosition = currentSnake.head + direction
 
-            // NOTE: if our snake is smaller than a snake close to us, do not go TOO close to it's head as it will eat us!
-            var valid = true
-            if (snake.head.adjacent().contains(newPosition)) {
-                // if a snake is close, we might lose head to head
-                valid = false
-                // aha! snake is smaller, try to eat it!
-                if (snake.length < currentSnake.length) {
-                    valid = true
+                // NOTE: if our snake is smaller than a snake close to us, do not go TOO close to it's head as it will eat us!
+                var valid = true
+                if (snake.head.adjacent().contains(newPosition)) {
+                    // if a snake is close, we might lose head to head
+                    valid = false
+                    // aha! snake is smaller, try to eat it!
+                    if (snake.length < currentSnake.length) {
+                        valid = true
+                    }
                 }
-            }
 
-            // Only print out this, if the move is valid :)
-            if (valid) {
-                println("Check for head-to-head collision against " + snake.name + " @ " + newPosition)
-                println("Lengths: other vs mine: " + snake.length + "," + currentSnake.length)
-                println("Is snake adjacent? " + snake.head.adjacent().contains(newPosition))
-                println("Direction " + direction)
-                println("Is move valid? " + valid)
-            }
+                // Only print out this, if the move is valid :)
+                if (valid) {
+                    println("Check for head-to-head collision against " + snake.name + " @ " + newPosition)
+                    println("Lengths: other vs mine: " + snake.length + "," + currentSnake.length)
+                    println("Is snake adjacent? " + snake.head.adjacent().contains(newPosition))
+                    println("snake adjacent: " + snake.head.adjacent())
+                    println("Direction " + direction)
+                    println("Is move valid? " + valid)
+                }
 
-            valid
+                valid
+            }
         }
     }
+
+    println("Found kill moves: " + safeMoves)
 
     return safeMoves.randomOrNull()
 }
