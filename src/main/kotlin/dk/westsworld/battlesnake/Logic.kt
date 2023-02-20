@@ -138,12 +138,12 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     }
 
     // check if we can kill a smaller snake in "the next move"
-    val killMove = findPossibleHeadToHeadKillDirection(battleSnake, board)
-    // if we can kill a snake, go for it
-    if (killMove != null) {
-        println("killMove available! " + killMove)
-        return killMove
-    }
+//    val killMove = findPossibleHeadToHeadKillDirection(battleSnake, board)
+//    // if we can kill a snake, go for it
+//    if (killMove != null) {
+//        println("killMove available! " + killMove)
+//        return killMove
+//    }
 
     // direction can be null, if there are no safe moves, where we have looked ahead for possible moves from other snakes
     if (bestDirection == null) {
