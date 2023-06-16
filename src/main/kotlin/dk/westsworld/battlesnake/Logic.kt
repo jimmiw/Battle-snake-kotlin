@@ -120,12 +120,12 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     }
 
     // check if we can kill a smaller snake in "the next move"
-//    val killMove = findPossibleHeadToHeadKillDirection(battleSnake, board)
-//    // if we can kill a snake, go for it
-//    if (killMove != null) {
-//        println("killMove available! " + killMove)
-//        return killMove
-//    }
+    val killMove = findPossibleHeadToHeadKillDirection(battleSnake, board)
+    // if we can kill a snake, go for it
+    if (killMove != null) {
+        println("killMove available! " + killMove)
+        return killMove
+    }
 
     // direction can be null, if there are no safe moves, where we have looked ahead for possible moves from other snakes
     if (bestDirection == null) {
@@ -219,36 +219,33 @@ fun findPossibleHeadToHeadKillDirection(currentSnake: BattleSnake, board: Board)
 
     for (snake in board.snakes) {
         // are we checking against our own snake?
-        if (snake.id != currentSnake.id) {
-            println("kill check on snake: " + snake.name)
-            // handle head-to-head collisions
-            safeMoves = safeMoves.filter { direction ->
-                // Find the next intended position
-                val newPosition = currentSnake.head + direction
+        if (snake.id == currentSnake.id) {
+            continue
+        }
+        // is the other snake bigger?
+        if (snake.body.size > currentSnake.body.size) {
+            continue
+        }
 
-                // NOTE: if our snake is smaller than a snake close to us, do not go TOO close to it's head as it will eat us!
-                var valid = true
-                if (snake.head.adjacent().contains(newPosition)) {
-                    // if a snake is close, we might lose head to head
-                    valid = false
-                    // aha! snake is smaller, try to eat it!
-                    if (snake.length < currentSnake.length) {
-                        valid = true
-                    }
-                }
+        println("kill check on snake: " + snake.name)
+        // handle head-to-head collisions
+        safeMoves = safeMoves.filter { direction ->
+            // Find the next intended position
+            val newPosition = currentSnake.head + direction
+            // if a snake is close, we might lose head to head
+            val valid = snake.head.adjacent().contains(newPosition)
 
-                // Only print out this, if the move is valid :)
-                if (valid) {
-                    println("Check for head-to-head collision against " + snake.name + " @ " + newPosition)
-                    println("Lengths: other vs mine: " + snake.length + "," + currentSnake.length)
-                    println("Is snake adjacent? " + snake.head.adjacent().contains(newPosition))
-                    println("snake adjacent: " + snake.head.adjacent())
-                    println("Direction " + direction)
-                    println("Is move valid? " + valid)
-                }
-
-                valid
+            // Only print out this, if the move is valid :)
+            if (valid) {
+                println("Check for head-to-head collision against " + snake.name + " @ " + newPosition)
+                println("Lengths: other vs mine: " + snake.length + "," + currentSnake.length)
+                println("Is snake adjacent? " + snake.head.adjacent().contains(newPosition))
+                println("snake adjacent: " + snake.head.adjacent())
+                println("Direction " + direction)
+                println("Is move valid? " + valid)
             }
+
+            valid
         }
     }
 
