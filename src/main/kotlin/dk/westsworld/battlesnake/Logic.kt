@@ -79,24 +79,8 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     }
 
     var safeMoves = getSafeMoves(battleSnake, board, areThereOtherSnakes())
-
-    // finding the optimal move, which is the one with "most space left" after the move has been done
-    var bestDirection: Direction? = null
-    var bestSpaceLeft = 0
-    // finds the best direction
-    for (move in safeMoves) {
-        // calculating the battle snake's head position, after the move
-        val position = battleSnake.head + move
-        // calculating how much space is left, if we are using the new potision
-        val spaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
-        val distanceToSnakeOnBestMove = getDistanceToClosestSnake(position, battleSnake, board.snakes)
-
-        // checking the amount of space left on the new move AND the distance to the nearest snake.
-        if (spaceLeft > bestSpaceLeft && distanceToSnakeOnBestMove > minimumDistanceToSnakeHeads) {
-            bestSpaceLeft = spaceLeft
-            bestDirection = move
-        }
-    }
+    // finds the best direction, by finding the move with the most space left :)
+    var bestDirection = getMoveWithMostSpaceLeft(safeMoves, battleSnake, board)
 
     println("food direction " + foodDirection)
     println("best direction " + bestDirection)
@@ -150,7 +134,30 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
         println("bestDirection was null, finding a less safe move with no lookahead")
         // find a safe move, but don't lookahead to see a possible dangerous situation
         safeMoves = getSafeMoves(battleSnake, board, false) // shouldMovesBeSafe() => false?
-        bestDirection = safeMoves.randomOrNull() ?: Direction.DOWN // TODO: handle NEVER eating our neck. Use isNeckPosition()
+        // finding the direction with the most space left OR down... because... we need to send something
+        bestDirection = getMoveWithMostSpaceLeft(safeMoves, battleSnake, board) ?: Direction.DOWN
+    }
+
+    return bestDirection
+}
+
+fun getMoveWithMostSpaceLeft(safeMoves: List<Direction>, battleSnake: BattleSnake, board: Board): Direction? {
+    // finding the optimal move, which is the one with "most space left" after the move has been done
+    var bestDirection: Direction? = null
+    var bestSpaceLeft = 0
+    // finds the best direction
+    for (move in safeMoves) {
+        // calculating the battle snake's head position, after the move
+        val position = battleSnake.head + move
+        // calculating how much space is left, if we are using the new potision
+        val spaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
+        val distanceToSnakeOnBestMove = getDistanceToClosestSnake(position, battleSnake, board.snakes)
+
+        // checking the amount of space left on the new move AND the distance to the nearest snake.
+        if (spaceLeft > bestSpaceLeft && distanceToSnakeOnBestMove > minimumDistanceToSnakeHeads) {
+            bestSpaceLeft = spaceLeft
+            bestDirection = move
+        }
     }
 
     return bestDirection
@@ -395,8 +402,17 @@ fun goTowardsFood(battleSnake: BattleSnake, board: Board): Direction? {
 
     var nextPosition = getNextMoveTowardsPosition(battleSnake.head, safeFoodPosition, route, board, maxDepth)
     println("Route is: " + route)
+    // if the route towards the food is empty, return null
+    if (route.isEmpty()) {
+        return null
+    }
     println("suggested new position is: " + nextPosition)
-    var nextDirection = battleSnake.head.getDirection(nextPosition ?: Position(0,0))
+    // if we cannot find a new position, return null
+    if (nextPosition == null) {
+        return null
+    }
+
+    var nextDirection = battleSnake.head.getDirection(nextPosition)
     println("suggested new direction is: " + nextDirection)
 
     return nextDirection
