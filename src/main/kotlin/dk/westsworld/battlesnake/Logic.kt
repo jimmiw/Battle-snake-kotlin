@@ -78,7 +78,7 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
         null
     }
 
-    var safeMoves = getSafeMoves(battleSnake, board, shouldMovesBeSafe())
+    var safeMoves = getSafeMoves(battleSnake, board, areThereOtherSnakes())
 
     // finding the optimal move, which is the one with "most space left" after the move has been done
     var bestDirection: Direction? = null
@@ -87,7 +87,7 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
     for (move in safeMoves) {
         // calculating the battle snake's head position, after the move
         val position = battleSnake.head + move
-        // calculating how much space is left, if that move is taken
+        // calculating how much space is left, if we are using the new potision
         val spaceLeft = getSpaceLeft(position, board, mutableListOf<Position>())
         val distanceToSnakeOnBestMove = getDistanceToClosestSnake(position, battleSnake, board.snakes)
 
@@ -275,7 +275,7 @@ fun isNeckPosition(snake: BattleSnake, position: Position): Boolean {
  * finds the moves that are safe to do.
  * Should this be cached?
  */
-fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boolean): List<Direction> {
+fun getSafeMoves(currentSnake: BattleSnake, board: Board, lookAheadForSnakes: Boolean): List<Direction> {
     val head = currentSnake.head
 
     // do not hit our own neck!
@@ -333,8 +333,8 @@ fun getSafeMoves(currentSnake: BattleSnake, board: Board, disregardSafety: Boole
         return listOf<Direction>()
     }
 
-    // if we are not disregarding safety, we should check the distance to the other snakes' heads
-    if (!disregardSafety) {
+    // if there are other snakes on the map, we should check the distance to the other snakes' heads, to be safer
+    if (lookAheadForSnakes) {
         safeMoves = safeMoves.filter { direction ->
             // Find the next intended position
             val newPosition = head + direction
@@ -471,7 +471,7 @@ fun getNextMoveTowardsPosition(currentPosition: Position, destinationPosition: P
     return null
 }
 
-private fun shouldMovesBeSafe(): Boolean {
+private fun areThereOtherSnakes(): Boolean {
     // ZOMG had to do a nasty switcharooooooo... if the game starts with solo, return true REVERSE!
     return ! isSoloMap()
 }
