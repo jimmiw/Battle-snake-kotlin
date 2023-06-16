@@ -215,7 +215,7 @@ fun shouldFindFood(battleSnake: BattleSnake, board: Board): Boolean {
  */
 fun findPossibleHeadToHeadKillDirection(currentSnake: BattleSnake, board: Board): Direction? {
     // first finding all the safe moves, disregarding safety towards other snakes!
-    var safeMoves = getSafeMoves(currentSnake, board, true)
+    var safeMoves = getSafeMoves(currentSnake, board, false)
 
     for (snake in board.snakes) {
         // are we checking against our own snake?
