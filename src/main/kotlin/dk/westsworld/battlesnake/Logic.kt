@@ -107,16 +107,14 @@ fun getMoveDirection(battleSnake: BattleSnake, board: Board): Direction {
         val distanceToFood = getDistanceToClosestSnake(suggestedFoodPosition, battleSnake, board.snakes)
         println("distance to closest snake is " + distanceToFood + ", should be more than " + minimumDistanceToSnakeHeads)
         if (distanceToFood > minimumDistanceToSnakeHeads) {
-            // if the food move, is the move with the most space left, take it
-            if (foodSpaceLeft >= bestSpaceLeft) {
+            // checking if the food move, can still be used... is there enough room for the snake if it's +1 length?
+            if (foodSpaceLeft + 1 > battleSnake.length) {
+                bestDirection = foodDirection
+                println("food is big enough: " + foodDirection + " with " + foodSpaceLeft + " space - has enough space for the snake, let's try it out!")
+            } else {
+                // if the food move, is the move with the most space left, take it
                 bestDirection = foodDirection
                 println("food is new bestDirection: " + foodDirection + " with " + foodSpaceLeft + " space - CHOSEN")
-            } else {
-                // checking if the food move, can still be used... is there enough room for the snake if it's +1 length?
-                if (foodSpaceLeft + 1 > battleSnake.length) {
-                    bestDirection = foodDirection
-                    println("food is big enough: " + foodDirection + " with " + foodSpaceLeft + " space - has enough space for the snake, let's try it out!")
-                }
             }
         }
     }
