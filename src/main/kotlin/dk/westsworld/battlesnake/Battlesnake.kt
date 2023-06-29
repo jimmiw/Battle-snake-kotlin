@@ -101,11 +101,13 @@ fun main() {
                 // This receives the post body as json text
 //                val request = call.receive<MoveRequest>()
 
+                var gameLogic = Logic()
+
                 // We will respond with whatever Logic.kt tells us!
                 call.respond(
                     MoveResponse(
                         shout = "Hello, world!",
-                        move = decideMove(request)
+                        move = gameLogic.decideMove(request)
                     )
                 )
             }
