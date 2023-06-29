@@ -185,13 +185,13 @@ internal class LogicKtTest {
     @Test
     fun testFindFood() {
         val gameLogic = Logic()
-        var request = getSoloFoodMoveRequest(
+        val request = getSoloFoodMoveRequest(
             Position(9,5),
             listOf(Position(9,5), Position(9,5)),
             listOf()
-        );
+        )
 
-        var route = mutableListOf<Position>()
+        val route = mutableListOf<Position>()
         var nextPosition: Position? = null
         val timeInMillis = measureTimeMillis {
             nextPosition = gameLogic.getNextMoveTowardsPosition(request.you.head, Position(10,6), route, request.board, 0)
@@ -200,7 +200,7 @@ internal class LogicKtTest {
         println("Route length: " + route.size)
         println("Route is: " + route)
         println("suggested new position is: " + nextPosition)
-        var nextDirection = request.you.head.getDirection(nextPosition ?: Position(8,5))
+        val nextDirection = request.you.head.getDirection(nextPosition ?: Position(8,5))
         println("suggested new direction is: " + nextDirection)
     }
 

@@ -14,11 +14,9 @@ class Logic {
      * You get the current game state passed as a parameter, you only have to return a direction to move into
      */
     fun decideMove(request: MoveRequest): Direction {
-//    println(request)
-
         game = request.game
 
-        var direction = Direction.UP
+        var direction: Direction
         val time = measureTimeMillis {
             direction = getMoveDirection(request.you, request.board)
         }
@@ -291,7 +289,7 @@ class Logic {
 
             !isNeckPosition(currentSnake, newPosition)
         }
-        println("safeMoves0 !neck: " + safeMoves);
+        println("safeMoves0 !neck: " + safeMoves)
         // Finds moves to do, that are still on the map :)
         safeMoves = safeMoves.filter { direction ->
             // Find the next intended position
@@ -300,7 +298,7 @@ class Logic {
             // testing if the new position is out of bounds, of the current board
             !isOutOfBounds(newPosition, board)
         }
-        println("safeMoves1 !oob: " + safeMoves);
+        println("safeMoves1 !oob: " + safeMoves)
 
         // only check for hazards, if we have a map with hazards and there are any hazards :)
         if (game?.map == "royale" && !board.hazards.isEmpty()) {
@@ -325,7 +323,7 @@ class Logic {
 
                 isHazardMove
             }
-            println("safeMoves2 !hazards: " + safeMoves);
+            println("safeMoves2 !hazards: " + safeMoves)
         }
         // making sure we are not hitting a snake on an existing position
         safeMoves = safeMoves.filter { direction ->
@@ -334,7 +332,7 @@ class Logic {
 
             !isCollidingWithASnake(newPosition, board)
         }
-        println("safeMoves3 !snakes: " + safeMoves);
+        println("safeMoves3 !snakes: " + safeMoves)
         if (safeMoves.isEmpty()) {
             println("no safe moves left, before disregardSafety checks")
             return listOf<Direction>()
@@ -400,7 +398,7 @@ class Logic {
         println("max depth is: " + maxDepth)
         println("current head position is: " + battleSnake.head)
 
-        var nextPosition = getNextMoveTowardsPosition(battleSnake.head, safeFoodPosition, route, board, maxDepth)
+        val nextPosition = getNextMoveTowardsPosition(battleSnake.head, safeFoodPosition, route, board, maxDepth)
         println("Route is: " + route)
         // if the route towards the food is empty, return null
         if (route.isEmpty()) {
@@ -412,7 +410,7 @@ class Logic {
             return null
         }
 
-        var nextDirection = battleSnake.head.getDirection(nextPosition)
+        val nextDirection = battleSnake.head.getDirection(nextPosition)
         println("suggested new direction is: " + nextDirection)
 
         return nextDirection
