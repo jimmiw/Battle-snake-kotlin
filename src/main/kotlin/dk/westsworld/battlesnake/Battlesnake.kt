@@ -91,6 +91,10 @@ fun main() {
 
             // The most important part: the move request
             post("/move") {
+                // This receives the post body as json text
+                // shorthand version, but I want to log my data to console (or database later on) so I cannot
+                // use it... Instead, I'm using receiveText, which I can then manipulate.
+//                val request = call.receive<MoveRequest>()
                 val json = call.receiveText()
                 println(json)
                 val serializer = Json {
@@ -98,10 +102,8 @@ fun main() {
                     ignoreUnknownKeys = true
                 }
                 val request = serializer.decodeFromString<MoveRequest>(json)
-                // This receives the post body as json text
-//                val request = call.receive<MoveRequest>()
 
-                var gameLogic = Logic()
+                val gameLogic = Logic()
 
                 // We will respond with whatever Logic.kt tells us!
                 call.respond(
