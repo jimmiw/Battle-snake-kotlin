@@ -13,7 +13,7 @@ RUN gradle clean build --no-daemon > /dev/null 2>&1 || true
 # Copy sourcecode into build image
 COPY . /app
 
-RUN gradle clean build --no-daemon
+RUN gradle build --no-daemon
 
 EXPOSE 3000
 
